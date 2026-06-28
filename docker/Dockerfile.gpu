@@ -1,0 +1,55 @@
+# =====================================================================
+# NemaSize — GPU image (slim, NVIDIA CUDA 12.1)
+# Only files & deps used by run_pipeline.py are included.
+# Requires on the HOST: NVIDIA GPU + driver + nvidia-container-toolkit.
+# Run with:  docker run --gpus all ...
+#
+# Build:
+#   docker build -f Dockerfile.gpu -t nemasize:gpu .
+# =====================================================================
+FROM pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime
+
+# --- System libs needed by OpenCV / scikit-image at runtime -----------
+# procps provides `ps`, required by Nextflow for task process monitoring.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libgl1 \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender1 \
+        procps \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    YOLO_OFFLINE=True \
+    MPLCONFIGDIR=/tmp/mpl
+
+WORKDIR /opt/nemasize
+
+# --- Runtime-only Python deps (torch already in base image) -----------
+# (Build context is the repo ROOT; this Dockerfile lives in docker/.)
+COPY docker/requirements-runtime.txt ./requirements-runtime.txt
+RUN pip install --no-cache-dir -r requirements-runtime.txt
+
+# --- Copy ONLY the scripts the pipeline needs ------------------------
+COPY run_pipeline.py            ./
+COPY detect_and_crop_rois.py    ./
+COPY skeletonize_worms.py       ./
+COPY visualize_predictions.py   ./
+COPY speed_meter.py             ./
+
+# --- Bake in model weights --------------------------------------------
+COPY weights/detect.pt ./weights/detect.pt
+COPY weights/seg.pt    ./weights/seg.pt
+
+ENV NEMASIZE_DETECT_MODEL=/opt/nemasize/weights/detect.pt \
+    NEMASIZE_SEG_MODEL=/opt/nemasize/weights/seg.pt
+
+WORKDIR /data
+
+ENTRYPOINT ["python", "/opt/nemasize/run_pipeline.py"]
+CMD ["--help"]

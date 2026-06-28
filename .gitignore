@@ -1,0 +1,43 @@
+# YOLO model weights (large files)
+*.pt
+*.pth
+*.weights
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Training outputs
+runs/
+wandb/
+
+# Dataset files (if large)
+datasets/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large output files
+*.csv
+*.log
+*.zip
+*.tar.gz

@@ -1,0 +1,62 @@
+# =====================================================================
+# NemaSize — CPU image (slim)
+# Only files & deps used by run_pipeline.py are included.
+# Build:
+#   docker build -f Dockerfile.cpu -t nemasize:cpu .
+# =====================================================================
+FROM python:3.11-slim
+
+# --- System libs needed by OpenCV / scikit-image at runtime -----------
+# procps provides `ps`, required by Nextflow for task process monitoring.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libgl1 \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender1 \
+        procps \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    YOLO_OFFLINE=True \
+    MPLCONFIGDIR=/tmp/mpl
+
+WORKDIR /opt/nemasize
+
+# --- CPU PyTorch (separate layer = better cache) ----------------------
+RUN pip install --no-cache-dir \
+        --index-url https://download.pytorch.org/whl/cpu \
+        torch==2.3.1 torchvision==0.18.1
+
+# --- Runtime-only Python deps -----------------------------------------
+# (Build context is the repo ROOT; this Dockerfile lives in docker/.)
+COPY docker/requirements-runtime.txt ./requirements-runtime.txt
+RUN pip install --no-cache-dir -r requirements-runtime.txt
+
+# --- Copy ONLY the scripts the pipeline needs ------------------------
+COPY run_pipeline.py            ./
+COPY detect_and_crop_rois.py    ./
+COPY skeletonize_worms.py       ./
+COPY visualize_predictions.py   ./
+COPY speed_meter.py             ./
+
+# --- Bake in model weights --------------------------------------------
+# Place trained models at:
+#     weights/detect.pt   (YOLO detector)
+#     weights/seg.pt      (YOLO ROI segmenter)
+COPY weights/detect.pt ./weights/detect.pt
+COPY weights/seg.pt    ./weights/seg.pt
+
+ENV NEMASIZE_DETECT_MODEL=/opt/nemasize/weights/detect.pt \
+    NEMASIZE_SEG_MODEL=/opt/nemasize/weights/seg.pt
+
+# --- Default working directory for user data --------------------------
+# End-users mount their project dir here:  -v /host/project:/data
+WORKDIR /data
+
+ENTRYPOINT ["python", "/opt/nemasize/run_pipeline.py"]
+CMD ["--help"]

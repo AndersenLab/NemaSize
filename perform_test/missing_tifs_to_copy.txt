@@ -1,0 +1,13 @@
+p01-growth-H01-2X_A02.TIF
+p01-growth-H01-2X_A04.TIF
+p01-growth-H01-2X_A07.TIF
+p01-growth-H01-2X_B02.TIF
+p01-growth-H01-2X_B03.TIF
+p01-growth-H01-2X_B11.TIF
+p15-growth-H15-2X_A03.TIF
+p15-growth-H15-2X_B01.TIF
+p37-growth-H37-2X_B01.TIF
+p49-growth-H49-2X_A01.TIF
+p49-growth-H49-2X_B02.TIF
+p49-growth-H49-2X_B03.TIF
+p49-growth-H49-2X_B05.TIF

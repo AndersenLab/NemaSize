@@ -1,0 +1,84 @@
+# =====================================================================
+# Files excluded from the Docker build context.
+#
+# IMPORTANT: This file MUST live at the repo root, because Docker reads
+# .dockerignore from the root of the build context. The Dockerfiles
+# themselves live in docker/ and are referenced via:
+#     docker build -f docker/Dockerfile.cpu -t nemasize:cpu .
+# (the trailing "." is the build context = repo root).
+#
+# Note: Dockerfile.cpu / Dockerfile.gpu use explicit `COPY <file>` for
+# the four pipeline scripts, so anything here is defense-in-depth AND
+# keeps the build context small (faster `docker build`).
+# =====================================================================
+
+# --- Version control / IDE / OS ---------------------------------------
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Python caches ----------------------------------------------------
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.egg-info
+.venv
+venv
+env
+
+# --- Local data / runs (NEVER ship these) -----------------------------
+runs/
+datasets/
+inference_rois/
+NemaSize_output/
+*.csv
+*.log
+
+# --- Docs ------------------------------------------------------------
+*.md
+
+# --- Sub-projects NOT used by run_pipeline.py -------------------------
+name_lookup/
+perform_test/
+SLURM_scripts/
+
+# --- Top-level scripts NOT used by run_pipeline.py --------------------
+augment_data.py
+cluster_test.py
+convert_coco_to_yolo_seg.py
+create_roi_dataset.py
+dataset_manager.py
+debug_o_shape.py
+debug_stitch_failure.py
+flatten_categories_example.py
+mask_well_imgs.py
+plot_gt_vs_pred_scatter.py
+plot_worm_stats.py
+restore_categories_example.py
+rfdetr_inference.py
+train_rfdetr_segmentation.py
+train_yolo_segmentation.py
+visualize_contour_skeleton.py
+
+# --- Stray top-level model files (we use weights/ instead) ------------
+rf-detr-seg-large.pt
+yolo26n.pt
+
+# --- Config samples ---------------------------------------------------
+config.example.json
+
+# --- Original (full) requirements file --------------------------------
+# The Docker images use requirements-runtime.txt instead.
+requirements.txt
+
+# --- Memory / agent state ---------------------------------------------
+.copilot
