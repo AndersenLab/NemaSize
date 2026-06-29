@@ -37,6 +37,12 @@ df_cp["tool"] = "CellProfiler"
 df = pd.concat([df_ns, df_cp], ignore_index=True)
 df["strain"] = df["strain"].replace("PB420", "CGC2")
 
+# ── Sample sizes ──────────────────────────────────────────────────────────────
+sample_sizes = df.groupby(["strain", "tool"])["median_wormlength_um"].count()
+print("Sample sizes (n wells per group):")
+print(sample_sizes.to_string())
+print()
+
 # ── Layout config ─────────────────────────────────────────────────────────────
 strains = sorted(df["strain"].unique())
 tools = ["CellProfiler", "NemaSize"]

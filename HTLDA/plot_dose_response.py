@@ -67,7 +67,7 @@ def aggregate(data_path: Path):
     df["strain"] = df["strain"].replace("PB420", "CGC2")
     agg = (
         df.groupby(["strain", "concentration_um"])["median_wormlength_um_reg"]
-        .agg(mean="mean", sd=lambda x: x.std())
+        .agg(mean="mean", sd=lambda x: x.std(), n="count")
         .reset_index()
     )
     nonzero_concs = sorted(agg.loc[agg["concentration_um"] > 0, "concentration_um"].unique())
@@ -177,5 +177,8 @@ shared_norm_ylim = (y_lo - margin, y_hi + margin)
 # Pass 2: plot each dataset with the shared y range
 for ds, (df, agg, nonzero_concs, pseudo_zero), agg_norm in zip(DATASETS, all_data, all_norms):
     print(f"\nProcessing: {ds['data'].name}")
+    print("Sample sizes (n wells per strain × concentration):")
+    print(agg.pivot(index="strain", columns="concentration_um", values="n").to_string())
+    print()
     plot_dose_response(agg, agg_norm, nonzero_concs, pseudo_zero,
                        ds["out"], norm_ylim=shared_norm_ylim)
