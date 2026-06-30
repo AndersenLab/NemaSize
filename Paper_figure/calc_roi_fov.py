@@ -26,24 +26,25 @@ from pathlib import Path
 # Configuration
 # ---------------------------------------------------------------------------
 
-ROI_CATALOG_PATH = r"C:\Users\lizih\Dropbox\JHU_2026_spring\NemaSeg\datasets\Perform_test\NeSg_perform\inference_rois\roi_catalog.json"
+# Fig 2
+ROI_CATALOG_PATH = r"C:\Users\jl200\Dropbox\JHU_2026_spring\NemaSeg\datasets\WormBodyROI_fix_overlap_catalog\valid\roi_catalog.json"
 
 # µm per pixel in the ORIGINAL image (CellProfiler calibration)
 UM_PER_PX = 3.2937
 
 # ROI names grouped by figure panel.  Keys can be any label, e.g. "Fig1", "Fig1a", "Fig2b".
 QUERY_ROI_NAMES = {
-    "Fig1a": [
-        "0_png.rf.168a7f1464a843d2217034df0330d03b_roi_0",
-        "0_png.rf.168a7f1464a843d2217034df0330d03b_roi_1",
+    "Fig2c": [
+        "109_png.rf.c8dd17e858d1df0c04a8d6524de5fe76_roi_6",
+        "84_png.rf.58f1729113639cc3714467029dcb4780_roi_3",
+        "10_png.rf.2a5422c48a272b06a5ed1e4811e31377_roi_17",
+        "176_png.rf.ade8f3becc3343adf565d66c9323a444_roi_14",
     ],
-    "Fig1b": [
-        "100_png.rf.93dbb301c4dc91fe8173d8a0a7f2dd5b_roi_0",
+    "Fig2d": [
+        "155_png.rf.f50fa82504926ab35f38301b6390248d_roi_23",
+        "10_png.rf.2a5422c48a272b06a5ed1e4811e31377_roi_19",
     ],
-    "Fig2": [
-        "101_png.rf.c4bf71f43d058b555a715c3e9695be8b_roi_3",
-        "102_png.rf.17ecda620c62893042cd19d261c2d15e_roi_10",
-    ],
+
 }
 
 # ---------------------------------------------------------------------------
