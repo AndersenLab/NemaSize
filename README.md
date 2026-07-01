@@ -1,4 +1,4 @@
-# NemaSize / NemaSeg
+# NemaSize
 
 Automated *C. elegans* body-length and width measurement from microscope
 images.
