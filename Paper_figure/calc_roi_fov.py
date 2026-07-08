@@ -174,6 +174,17 @@ FIGURES = {
             "176_png.rf.ade8f3becc3343adf565d66c9323a444_roi_20",
         ],
     },
+    "FigS2": {
+        "catalog": r"C:\Users\jl200\Dropbox\JHU_2026_spring\NemaSeg\datasets\Perform_test\NeSg_perform\inference_rois\roi_catalog.json",
+        "rois": [
+            "172_png.rf.f3457ec580e8349d69afeb37c6eae6f8_roi_17",
+            "33_png.rf.7b2ed94dd972fe6fe24277fbb2eb0d04_roi_17",
+            "85_png.rf.75439e009b13787c8bd637122941d6c9_roi_36",
+            "84_png.rf.58f1729113639cc3714467029dcb4780_roi_49",
+            "79_png.rf.5ec9f077f4d5af0f3ab029d7283bba4e_roi_57",
+            "85_png.rf.75439e009b13787c8bd637122941d6c9_roi_31",
+        ],
+    },
     
 }
 
