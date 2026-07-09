@@ -41,3 +41,7 @@ Thumbs.db
 *.log
 *.zip
 *.tar.gz
+
+# Exception: figure_replication data/output must be tracked so the
+# supplement is reproducible (small, curated CSVs — not "large output").
+!figure_replication/**/*.csv

@@ -24,13 +24,9 @@ ultralytics>=8.0.0
 torch>=2.0.0
 torchvision>=0.15.0
 
-# RF-DETR Segmentation Training Dependencies
-rfdetr>=1.4.0
-supervision>=0.20.0  # For RF-DETR inference visualization
-
-# Optional: For RF-DETR logging and export
-# pip install rfdetr[metrics]  # For TensorBoard and W&B logging
-# pip install rfdetr[onnxexport]  # For ONNX export
-
 # Optional: For advanced RLE mask decoding
 # pycocotools>=2.0.6
+
+# Note: RF-DETR is an experimental/optional alternative segmentation trainer,
+# not part of the documented pipeline. Its dependencies (rfdetr, supervision)
+# live in ../misc/experimental_rfdetr/requirements.txt instead.

@@ -47,23 +47,52 @@ data, or modify the pipeline, keep reading.
 
 ## Repository layout
 
+The repo is organized into four top-level modules:
+
+| Module | Purpose |
+|---|---|
+| [`source_code/`](source_code/) | The documented pipeline: detection, segmentation, skeletonization, training, dataset tools |
+| [`figure_replication/`](figure_replication/) | Self-contained data + scripts to regenerate the paper's figures |
+| [`docker/`](docker/) | Dockerfiles, runtime requirements, end-user guide |
+| [`misc/`](misc/) | Auxiliary scripts not required to run the pipeline (grouped by purpose) |
+
+### `source_code/`
+
 | File / folder | Purpose |
 |---|---|
 | `run_pipeline.py` | End-to-end pipeline runner (detect → segment → skeletonize) |
 | `detect_and_crop_rois.py` | Stage 1: YOLO detection + ROI cropping |
 | `skeletonize_worms.py` | Stage 2: segmentation + centerline + length/width CSV |
+| `speed_meter.py` | Optional inference-speed benchmarking helper |
 | `create_roi_dataset.py` | Build a YOLO-seg training set from ROI crops |
 | `train_yolo_segmentation.py` | Train the YOLO segmentation model |
-| `train_rfdetr_segmentation.py` | (Optional) RF-DETR segmentation trainer — experimental |
 | `dataset_manager.py` | Local dataset utilities: split, augment, visualize, COCO checks |
 | `augment_data.py` | CLI wrapper around the augmentation routines |
 | `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO-seg format |
 | `visualize_predictions.py` / `visualize_contour_skeleton.py` | QC visualizations |
 | `mask_well_imgs.py` | Mask out non-well regions in raw plate images |
-| `docker/` | Dockerfiles, runtime requirements, end-user guide |
+| `config.example.json` | Example `dataset_manager` config |
+| `requirements.txt` | Full pipeline dependencies |
+| `examples/` | Usage examples for `dataset_manager.py` (flatten/restore categories) |
+
+### `figure_replication/`
+
+| Folder | Purpose |
+|---|---|
+| `main_measurement_figures/` | Data + script to regenerate the NemaSize-vs-CellProfiler-vs-GT comparison figures |
+| `dose_response_figures/` | Dose-response / EC10-50-90 figures |
+| `roi_fov_calculations/` | Field-of-view calculations reported for select figures |
+
+### `misc/`
+
+| Folder | Purpose |
+|---|---|
+| `full_evaluation_pipeline/` | Full evaluation codebase behind `figure_replication/main_measurement_figures` (mask matching, stats) |
+| `experimental_rfdetr/` | (Optional) RF-DETR segmentation trainer/inference — experimental, not part of the documented pipeline |
+| `debug/` | One-off debugging scripts |
+| `exploratory_analysis/` | Exploratory QC plotting scripts |
+| `dataset_bookkeeping/` | Filename lookup / HPC data-wrangling utilities |
 | `SLURM_scripts/` | Example HPC submission scripts |
-| `name_lookup/`, `perform_test/` | Auxiliary analysis scripts |
-| `runs/` | Training run outputs |
 
 ---
 
@@ -72,7 +101,7 @@ data, or modify the pipeline, keep reading.
 ### 1. Install
 
 ```bash
-pip install -r requirements.txt
+pip install -r source_code/requirements.txt
 ```
 
 ### 2. Organize your data
@@ -89,13 +118,13 @@ my_experiment/
 
 ```bash
 # Local machine (uses the local model paths defined in run_pipeline.py)
-python run_pipeline.py /path/to/my_experiment --local
+python source_code/run_pipeline.py /path/to/my_experiment --local
 
 # HPC / cluster (uses the cluster model paths)
-python run_pipeline.py /path/to/my_experiment
+python source_code/run_pipeline.py /path/to/my_experiment
 
 # Override model weights directly
-python run_pipeline.py /path/to/my_experiment \
+python source_code/run_pipeline.py /path/to/my_experiment \
     --detect-model /path/to/detect.pt \
     --seg-model    /path/to/seg.pt
 ```
@@ -133,7 +162,7 @@ plate images annotated with worm bounding boxes.
 ### Segmentation (Stage 2)
 
 ```bash
-python train_yolo_segmentation.py
+python source_code/train_yolo_segmentation.py
 ```
 
 Edit the dataset path and hyperparameters at the top of
@@ -143,7 +172,8 @@ of `create_roi_dataset.py` (per-worm crops with polygon masks).
 ### Dataset utilities
 
 `dataset_manager.py` handles split, augment, visualize, and format
-conversion in one place. Most users only need:
+conversion in one place. Most users only need (run from inside `source_code/`,
+or add that folder to your `PYTHONPATH`):
 
 ```python
 from dataset_manager import DatasetManager
@@ -162,8 +192,8 @@ Supported annotation formats: **COCO** (recommended), YOLO, Pascal VOC.
 Augmentations: rotation, intensity, Gaussian noise, and combinations
 thereof — annotations are transformed automatically.
 
-See [AUGMENTATION_GUIDE.md](AUGMENTATION_GUIDE.md) for details and
-`dataset_manager.py` for the full API.
+See [source_code/AUGMENTATION_GUIDE.md](source_code/AUGMENTATION_GUIDE.md) for
+details and `dataset_manager.py` for the full API.
 
 ---
 

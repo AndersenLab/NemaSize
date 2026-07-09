@@ -36,11 +36,11 @@ COPY docker/requirements-runtime.txt ./requirements-runtime.txt
 RUN pip install --no-cache-dir -r requirements-runtime.txt
 
 # --- Copy ONLY the scripts the pipeline needs ------------------------
-COPY run_pipeline.py            ./
-COPY detect_and_crop_rois.py    ./
-COPY skeletonize_worms.py       ./
-COPY visualize_predictions.py   ./
-COPY speed_meter.py             ./
+COPY source_code/run_pipeline.py            ./
+COPY source_code/detect_and_crop_rois.py    ./
+COPY source_code/skeletonize_worms.py       ./
+COPY source_code/visualize_predictions.py   ./
+COPY source_code/speed_meter.py             ./
 
 # --- Bake in model weights --------------------------------------------
 COPY weights/detect.pt ./weights/detect.pt

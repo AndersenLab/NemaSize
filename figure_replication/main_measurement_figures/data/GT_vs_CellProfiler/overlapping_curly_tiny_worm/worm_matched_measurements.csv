@@ -1,0 +1,2 @@
+human_file,cp_source_filename,cp_row_index,iou,length_um_human,width_um_human,length_um_cellprofiler,length_diff_um,abs_length_diff_um
+72_png.rf.e077661159386a8d9dfdaf279fb21f95_roi_15.png,72.png,984,0.4878772795200348,169.52714501597873,14.386377094726566,167.507411930029,-2.0197330859497242,2.0197330859497242

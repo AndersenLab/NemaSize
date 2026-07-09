@@ -1,0 +1,14 @@
+Per-box statistics for width_difference_boxplot.png
+Values are percentage error of worm width (%): (computer - human) / human * 100
+
+category                            method            n       mean     median        std        q25        q75
+--------------------------------------------------------------------------------------------------------------
+bent_worm                           NemaSize         16     -2.600     -1.528      8.230     -3.967      2.911
+curly_tiny_worm                     NemaSize         16     -0.759     -2.279      9.513     -7.851      3.872
+curly_worm                          NemaSize         60      3.254      3.498      3.533      1.685      5.042
+incomplete_worm                     NemaSize         11     -0.265      0.299      9.013     -7.298      6.619
+overlapping_worm                    NemaSize         12      3.727      3.411      6.266     -0.065      8.798
+self-overlapping_worm               NemaSize          6      5.580      5.960      7.682      1.003      6.281
+straight_worm                       NemaSize        423      3.711      3.052      6.897     -1.072      8.221
+tiny_worm                           NemaSize         95      3.875      4.164     10.005     -1.947      8.496
+all_categories                      NemaSize        639      3.372      3.052      7.430     -1.486      7.498

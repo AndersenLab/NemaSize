@@ -1,0 +1,8 @@
+# Extra dependencies for the experimental RF-DETR trainer/inference scripts
+# in this folder. Not required by the main pipeline (source_code/).
+rfdetr>=1.4.0
+supervision>=0.20.0  # For RF-DETR inference visualization
+
+# Optional: For RF-DETR logging and export
+# pip install rfdetr[metrics]  # For TensorBoard and W&B logging
+# pip install rfdetr[onnxexport]  # For ONNX export

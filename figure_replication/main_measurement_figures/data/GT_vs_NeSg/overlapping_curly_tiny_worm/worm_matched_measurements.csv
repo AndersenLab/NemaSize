@@ -1,0 +1,2 @@
+human_file,computer_file,iou,length_um_human,width_um_human,length_um_computer,width_um_computer,length_diff_um,width_diff_um,abs_length_diff_um,abs_width_diff_um
+72_png.rf.e077661159386a8d9dfdaf279fb21f95_roi_16.png,72_png.rf.e077661159386a8d9dfdaf279fb21f95_roi_2.png,0.8397436141967773,199.9593436635215,15.31610782535196,213.26568220427677,15.281935987822491,13.306338540755263,-0.03417183752946862,13.306338540755263,0.03417183752946862

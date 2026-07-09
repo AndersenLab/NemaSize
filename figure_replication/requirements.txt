@@ -1,0 +1,7 @@
+# Lightweight dependencies for regenerating the paper figures in this
+# folder (main_measurement_figures/, dose_response_figures/,
+# roi_fov_calculations/). No YOLO / torch / rfdetr required.
+numpy>=1.21.0
+pandas>=1.4.0
+matplotlib>=3.5.0
+scipy>=1.9.0

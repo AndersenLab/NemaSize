@@ -13,11 +13,12 @@ There are two audiences in this document:
 
 The image is intentionally minimal — only what `run_pipeline.py` actually needs.
 
-**Source files copied into the image (4 only):**
-- `run_pipeline.py` — entry point
-- `detect_and_crop_rois.py` — Stage 1
-- `skeletonize_worms.py` — Stage 2
-- `visualize_predictions.py` — supplies `get_image_files` to Stage 2
+**Source files copied into the image (from `source_code/`, 5 total):**
+- `source_code/run_pipeline.py` — entry point
+- `source_code/detect_and_crop_rois.py` — Stage 1
+- `source_code/skeletonize_worms.py` — Stage 2
+- `source_code/visualize_predictions.py` — supplies `get_image_files` to Stage 2
+- `source_code/speed_meter.py` — optional benchmarking helper
 
 **Python packages installed** (see `docker/requirements-runtime.txt`):
 `opencv-python`, `numpy`, `tqdm`, `scipy`, `scikit-image`, `skan`, `networkx`,
@@ -30,14 +31,15 @@ runtime), plus `procps` (provides `ps`, required by **Nextflow** for task
 process monitoring — omit and Nextflow trace metrics will be empty).
 
 **Excluded from the image** (via explicit COPY + `.dockerignore`):
-- Training scripts (`train_*.py`), RF-DETR (`rfdetr_inference.py`,
-  `rfdetr` package), all dataset-management / debug / plotting scripts
-- Sub-folders `name_lookup/`, `perform_test/`, `SLURM_scripts/`, `runs/`,
-  `datasets/`, `NemaSize_output/`
+- Everything under `misc/` (training-adjacent, experimental RF-DETR, debug,
+  exploratory-analysis, dataset-bookkeeping, and SLURM scripts) and
+  `figure_replication/` (paper-figure data/scripts)
+- Other `source_code/` files not explicitly COPYed above (`train_*.py`,
+  `dataset_manager.py`, `augment_data.py`, etc.)
 - Heavy unused deps: `matplotlib`, `pandas`, `shapely`, `PyYAML`, `rfdetr`,
   `supervision`, `transformers`, `timm`, …
-- Docs (`*.md`), git history, IDE configs, Python caches, the original
-  `requirements.txt`, stray top-level `*.pt` files
+- Docs (`*.md`), git history, IDE configs, Python caches, `source_code/requirements.txt`,
+  stray top-level `*.pt` files
 
 If you later need an excluded script *inside* the container, add it to the
 `COPY` list in the Dockerfile and rebuild.
@@ -93,10 +95,13 @@ NemaSeg/
 ├── weights/
 │   ├── detect.pt   ← YOLO detector  (was: runs/segment/worm_seg_train/weights/best.pt)
 │   └── seg.pt      ← YOLO ROI segmenter (was: runs/.../roi_seg_train_fix_overlap/weights/best.pt)
-├── run_pipeline.py
-├── detect_and_crop_rois.py
-├── skeletonize_worms.py
-├── visualize_predictions.py
+├── source_code/
+│   ├── run_pipeline.py
+│   ├── detect_and_crop_rois.py
+│   ├── skeletonize_worms.py
+│   ├── visualize_predictions.py
+│   ├── speed_meter.py
+│   └── ...
 └── ...
 ```
 

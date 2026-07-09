@@ -5,7 +5,12 @@ where the logic breaks down.
 """
 
 import os
+import sys
 from pathlib import Path
+
+# skeletonize_worms.py now lives in source_code/ (this script was moved to
+# misc/debug/ during the repo reorganization).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "source_code"))
 
 import cv2
 import matplotlib

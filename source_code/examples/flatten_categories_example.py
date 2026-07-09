@@ -3,6 +3,10 @@ Example script demonstrating how to flatten/merge all categories into a single c
 This is useful when you want to detect objects (e.g., worms) without distinguishing between types.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from dataset_manager import DatasetManager
 
 def main():

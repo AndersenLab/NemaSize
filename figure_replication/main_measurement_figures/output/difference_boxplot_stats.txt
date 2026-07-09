@@ -1,0 +1,23 @@
+Per-box statistics for difference_boxplot.png
+Values are percentage error of worm length (%): (computer - human) / human * 100
+
+category                            method            n       mean     median        std        q25        q75
+--------------------------------------------------------------------------------------------------------------
+bent_worm                           NemaSize         16      5.361      0.972     10.131      0.178      4.100
+bent_worm                           CellProfiler     16     -4.638     -2.633     12.220    -12.217      2.585
+curly_tiny_worm                     NemaSize         16      8.030      7.884      6.861      2.595     14.243
+curly_tiny_worm                     CellProfiler     16    -18.110    -16.293     13.309    -27.087     -7.329
+curly_worm                          NemaSize         60      1.056      0.973      2.803     -1.118      2.628
+curly_worm                          CellProfiler     60    -40.495    -49.140     19.885    -51.509    -35.481
+incomplete_worm                     NemaSize         11      3.314      3.576      4.349      0.006      6.331
+incomplete_worm                     CellProfiler     11     -8.284      2.290     23.001    -24.177      9.869
+overlapping_worm                    NemaSize         12      1.380      1.267      2.074      0.580      3.365
+overlapping_worm                    CellProfiler     12      2.852      2.347     10.521     -2.070      6.958
+self-overlapping_worm               NemaSize          6      0.704      1.179      5.901      0.078      2.423
+self-overlapping_worm               CellProfiler      6    -50.913    -49.589      8.628    -56.382    -43.799
+straight_worm                       NemaSize        423      2.521      2.042      3.139      0.592      3.863
+straight_worm                       CellProfiler    423      1.231      4.143     10.391      0.783      6.610
+tiny_worm                           NemaSize         95      6.912      6.060      5.746      3.357      9.890
+tiny_worm                           CellProfiler     95    -26.486    -21.262     18.554    -42.899    -12.493
+all_categories                      NemaSize        639      3.220      2.362      4.459      0.579      4.668
+all_categories                      CellProfiler    639     -8.062      1.447     20.155    -16.695      5.632

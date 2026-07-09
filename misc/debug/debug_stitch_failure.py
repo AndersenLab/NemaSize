@@ -37,7 +37,9 @@ from ultralytics import YOLO
 
 # ── Import helpers from skeletonize_worms ─────────────────────────────────
 # All the heavy lifting is already implemented there; we just reuse it.
-sys.path.insert(0, os.path.dirname(__file__))
+# skeletonize_worms.py now lives in source_code/ (this script was moved to
+# misc/debug/ during the repo reorganization).
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "source_code"))
 from skeletonize_worms import (
     _gap_connection_cost,
     _gap_failure_reason,
