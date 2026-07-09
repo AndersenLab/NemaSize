@@ -1,47 +1,35 @@
 # NemaSize
 
-Automated *C. elegans* body-length and width measurement from microscope
-images.
+Source code and data accompanying the manuscript:
 
-Written by **Zihao John Li** (Andersen Lab, Johns Hopkins University).
+"**Multiscale learning and topological analysis across complex postures enable robust nematode size quantification in pharmacological assays**"
+
+Authors: Zihao (John) Li, Amanda O. Shaver, Michael E.G. Sauria, Jack Weinstein, Maya K. Mastronardo, Nikita S. Jhaveri, Kate Stone, Rachel Choo, Colin Lilley, Esha Sharma, Rohan Shrishrimal, Grayson Benson, Ariel Shi, Cecilia Soko, and Erik C. Andersen*
+
+Affiliation: Department of Biology, Johns Hopkins University, Baltimore, MD 21218, USA
+
+The manuscript will be deposited on bioRxiv.
+This repository can be cloned from: <https://github.com/AndersenLab/NemaSize>
 
 ---
 
-## What this repo contains
+## Overview of NemaSize
 
-A two-stage YOLO pipeline that turns raw well-plate images into per-worm
-length and width measurements:
+NemaSize is AI-aided pipeline to measure nematode body sizes across complex posuture using multiscale learning and topology-aware skeletonization. NemaSize use a two-stage pipeline that turns raw well images into length and width measurements for individual worms:
 
 ```
-raw images ──► [Stage 1] YOLO detection  ──► per-worm ROI crops
+raw images ──► [Stage 1] YOLO26-WF detection  ──► per-worm ROI crops
                                               │
                                               ▼
-                            [Stage 2] YOLO-Seg segmentation
+                            [Stage 2] YOLO26-WS high-resolution segmentation
                                               │
                                               ▼
-                            centerline skeletonization
+                            Topology-aware centerline skeletonization
                                               │
                                               ▼
-                                  worm_lengths.csv (µm)
+                                  worm lengths and widths (.csv)
                                   contour + skeleton (.txt)
 ```
-
-### End users
-
-If you just want to **run the pipeline on your own images**, use the
-Docker image — you do not need Python, CUDA, or any of the source code:
-
-> 📘 **Beta-tester guide:** [docker/USER_GUIDE.md](docker/USER_GUIDE.md)
->
-> ```bash
-> docker pull zihaojohnli/nemasize:cpu        # or :gpu
-> docker run --rm -v /path/to/my_experiment:/data zihaojohnli/nemasize:cpu /data
-> ```
-
-### Developers / model trainers
-
-If you want to retrain the detection or segmentation models, augment
-data, or modify the pipeline, keep reading.
 
 ---
 
@@ -51,28 +39,27 @@ The repo is organized into four top-level modules:
 
 | Module | Purpose |
 |---|---|
-| [`source_code/`](source_code/) | The documented pipeline: detection, segmentation, skeletonization, training, dataset tools |
-| [`figure_replication/`](figure_replication/) | Self-contained data + scripts to regenerate the paper's figures |
-| [`docker/`](docker/) | Dockerfiles, runtime requirements, end-user guide |
-| [`misc/`](misc/) | Auxiliary scripts not required to run the pipeline (grouped by purpose) |
+| [`source_code/`](source_code/) | Source code for the pipeline: training, detection, segmentation, and skeletonization |
+| [`figure_replication/`](figure_replication/) | Self-contained data and scripts to replicate the paper figures |
+| [`docker/`](docker/) | Source code for building the docker container and instrusctions for deployment |
+| [`misc/`](misc/) | Archieve of auxiliary scripts not required to run the pipeline |
 
 ### `source_code/`
 
 | File / folder | Purpose |
 |---|---|
-| `run_pipeline.py` | End-to-end pipeline runner (detect → segment → skeletonize) |
-| `detect_and_crop_rois.py` | Stage 1: YOLO detection + ROI cropping |
-| `skeletonize_worms.py` | Stage 2: segmentation + centerline + length/width CSV |
-| `speed_meter.py` | Optional inference-speed benchmarking helper |
-| `create_roi_dataset.py` | Build a YOLO-seg training set from ROI crops |
-| `train_yolo_segmentation.py` | Train the YOLO segmentation model |
-| `dataset_manager.py` | Local dataset utilities: split, augment, visualize, COCO checks |
-| `augment_data.py` | CLI wrapper around the augmentation routines |
-| `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO-seg format |
-| `visualize_predictions.py` / `visualize_contour_skeleton.py` | QC visualizations |
-| `mask_well_imgs.py` | Mask out non-well regions in raw plate images |
-| `config.example.json` | Example `dataset_manager` config |
-| `requirements.txt` | Full pipeline dependencies |
+| `run_pipeline.py` | Main end-to-end pipeline runner (detect → segment → skeletonize) |
+| `detect_and_crop_rois.py` | Stage 1: YOLO detection → ROI cropping |
+| `skeletonize_worms.py` | Stage 2: segmentation → centerline → length/width CSV |
+| `speed_meter.py` | Speed benchmarking helper |
+| `create_roi_dataset.py` | Build ROI image sets from full-well images for training YOLO26-WS |
+| `train_yolo_segmentation.py` | Train the YOLO segmentation models |
+| `dataset_manager.py` | Dataset utilities: split, augment, and visualization |
+| `augment_data.py` | data augmentation |
+| `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO format |
+| `visualize_predictions.py` | Visualizations of YOLO inference results |
+| `visualize_contour_skeleton.py` | Visualizations of inferred contours and skeletons |
+| `requirements.txt` | Required dependencies for the full pipeline |
 | `examples/` | Usage examples for `dataset_manager.py` (flatten/restore categories) |
 
 ### `figure_replication/`
@@ -92,9 +79,28 @@ The repo is organized into four top-level modules:
 | `debug/` | One-off debugging scripts |
 | `exploratory_analysis/` | Exploratory QC plotting scripts |
 | `dataset_bookkeeping/` | Filename lookup / HPC data-wrangling utilities |
+| `standalone_utilities/` | Standalone tools not wired into the pipeline (`mask_well_imgs.py`, `config.example.json`) |
 | `SLURM_scripts/` | Example HPC submission scripts |
 
 ---
+
+### End users
+
+If you just want to **run the pipeline on your own images**, use the
+Docker image — you do not need Python, CUDA, or any of the source code:
+
+> 📘 **Beta-tester guide:** [docker/USER_GUIDE.md](docker/USER_GUIDE.md)
+>
+> ```bash
+> docker pull zihaojohnli/nemasize:cpu        # or :gpu
+> docker run --rm -v /path/to/my_experiment:/data zihaojohnli/nemasize:cpu /data
+> ```
+
+### Developers / model trainers
+
+If you want to retrain the detection or segmentation models, augment
+data, or modify the pipeline, keep reading.
+
 
 ## Quick start (running the pipeline from source)
 
