@@ -59,23 +59,23 @@ The repo is organized into four top-level modules:
 | `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO format |
 | `visualize_predictions.py` | Visualizations of YOLO inference results |
 | `visualize_contour_skeleton.py` | Visualizations of contours and skeletons output from the pipeline |
-| `flatten_categories.py` | Merge all dataset categories into a single category (via `dataset_manager.py`) |
-| `restore_categories.py` | Restore dataset categories from an automatic backup (via `dataset_manager.py`) |
+| `flatten_categories.py` | Merge all dataset categories into a single category |
+| `restore_categories.py` | Restore dataset categories from an automatic backup |
 | `requirements.txt` | Required dependencies for the full pipeline |
 
 ### `figure_replication/`
 
 | Folder | Purpose |
 |---|---|
-| `main_measurement_figures/` | Data + script to regenerate the NemaSize-vs-CellProfiler-vs-GT comparison figures |
-| `dose_response_figures/` | Dose-response / EC10-50-90 figures |
+| `Figs_4_and_S1/` | Data + script to regenerate the NemaSize-vs-CellProfiler-vs-GT comparison figures |
+| `Fig_5/` | Dose-response / EC10-50-90 figures |
 | `roi_fov_calculations/` | Field-of-view calculations reported for select figures |
 
 ### `misc/`
 
 | Folder | Purpose |
 |---|---|
-| `full_evaluation_pipeline/` | Full evaluation codebase behind `figure_replication/main_measurement_figures` (mask matching, stats) |
+| `full_evaluation_pipeline/` | Full evaluation codebase behind `figure_replication/Figs_4_and_S1` (mask matching, stats) |
 | `experimental_rfdetr/` | (Optional) RF-DETR segmentation trainer/inference — experimental, not part of the documented pipeline |
 | `debug/` | One-off debugging scripts |
 | `exploratory_analysis/` | Exploratory QC plotting scripts |
