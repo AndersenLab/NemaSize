@@ -67,8 +67,8 @@ The repo is organized into four top-level modules:
 
 | Folder | Purpose |
 |---|---|
-| `Figs_4_and_S1/` | Data + script to regenerate the NemaSize-vs-CellProfiler-vs-GT comparison figures |
-| `Fig_5/` | Dose-response / EC10-50-90 figures |
+| `Figs_4_and_S1/` | Data and scripts to regenerate Figs. 4 and S1 |
+| `Fig_5/` | Data and scripts to regenerate Fig. 5 |
 
 ### `misc/`
 

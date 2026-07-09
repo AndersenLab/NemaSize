@@ -11,19 +11,14 @@ from pathlib import Path
 
 plt.rcParams["font.family"] = "Arial"
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR = SCRIPT_DIR / "data"
+OUTPUT_DIR = SCRIPT_DIR / "output"
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
-NEMASIZE_PATH = Path(
-    r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-    r"\Dose_response\20260615_length_reg_delta_nemasize.csv"
-)
-CELLPROFILER_PATH = Path(
-    r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-    r"\Dose_response\20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
-)
-OUT_PATH = Path(
-    r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-    r"\Dose_response\plots\worm_length_boxplot.svg"
-)
+NEMASIZE_PATH = DATA_DIR / "20260615_length_reg_delta_nemasize.csv"
+CELLPROFILER_PATH = DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
+OUT_PATH = OUTPUT_DIR / "worm_length_boxplot.svg"
 
 # ── Load & label ──────────────────────────────────────────────────────────────
 df_ns = pd.read_csv(NEMASIZE_PATH)

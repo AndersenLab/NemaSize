@@ -28,38 +28,27 @@ import pandas as pd
 from scipy.optimize import curve_fit
 from scipy.stats import norm
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR = SCRIPT_DIR / "data"
+OUTPUT_DIR = SCRIPT_DIR / "output"
+
 # Same two CSVs as plot_dose_response.py. Both datasets analyse the SAME images;
 # they differ only in the processing tool (NemaSize vs CellProfiler).
 DATASETS = [
     {
         "name": "NemaSize",
-        "data": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\20260615_length_reg_delta_nemasize.csv"
-        ),
-        "out": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\ec_estimates_NemaSize.csv"
-        ),
+        "data": DATA_DIR / "20260615_length_reg_delta_nemasize.csv",
+        "out": OUTPUT_DIR / "ec_estimates_NemaSize.csv",
     },
     {
         "name": "CellProfiler",
-        "data": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
-        ),
-        "out": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\ec_estimates_CellProfiler.csv"
-        ),
+        "data": DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv",
+        "out": OUTPUT_DIR / "ec_estimates_CellProfiler.csv",
     },
 ]
 
 # Combined side-by-side comparison output (slope + EC + SEs, both methods)
-COMPARISON_OUT = Path(
-    r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-    r"\Dose_response\ec_estimates_comparison.csv"
-)
+COMPARISON_OUT = OUTPUT_DIR / "ec_estimates_comparison.csv"
 
 TRAIT = "median_wormlength_um_reg"
 C_FIXED = -600.0        # LL.4(fixed = c(NA, -600, NA, NA))

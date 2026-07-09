@@ -14,6 +14,10 @@ from pathlib import Path
 
 plt.rcParams["font.family"] = "Arial"
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR = SCRIPT_DIR / "data"
+OUTPUT_DIR = SCRIPT_DIR / "output"
+
 # ── Normalised plot font sizes ─────────────────────────────────────────────────
 NORM_TICK_SIZE   = 12   # tick labels
 NORM_LEGEND_SIZE = 10   # legend text
@@ -26,24 +30,12 @@ NORM_FIG_WIDTH, NORM_FIG_HEIGHT = 3.5, 3.5    # normalised plot
 # ── Datasets to process ───────────────────────────────────────────────────────
 DATASETS = [
     {
-        "data": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\20260615_length_reg_delta_nemasize.csv"
-        ),
-        "out": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\plots\dose_response_nemasize.svg"
-        ),
+        "data": DATA_DIR / "20260615_length_reg_delta_nemasize.csv",
+        "out": OUTPUT_DIR / "dose_response_nemasize.svg",
     },
     {
-        "data": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
-        ),
-        "out": Path(
-            r"C:\Users\lizih\Dropbox\Publication\NemaSize\Figures\Fig5"
-            r"\Dose_response\plots\dose_response_cbriggsae.svg"
-        ),
+        "data": DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv",
+        "out": OUTPUT_DIR / "dose_response_cbriggsae.svg",
     },
 ]
 
