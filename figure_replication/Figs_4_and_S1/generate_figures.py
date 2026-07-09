@@ -3,9 +3,9 @@
 This is a trimmed-down mirror of ``perform_stats.py`` that keeps only the
 functions/utilities required to regenerate:
 
-  - all_categories_scatter.png    (pooled GT-vs-computer length scatter)
-  - difference_boxplot.png        (length percentage-error box plot)
-  - width_difference_boxplot.png  (width percentage-error box plot, NemaSize only)
+  - Fig_4A.png  (pooled GT-vs-computer length scatter)
+  - Fig_4B.png  (length percentage-error box plot)
+  - Fig_S1.png  (width percentage-error box plot, NemaSize only)
 
 It is meant to run standalone from this folder using the data bundled under
 ``data/`` (no external Dropbox paths required):
@@ -291,7 +291,7 @@ def _collect_pooled_data_by_source(
 	return result
 
 
-# --- Figure 1: all_categories_scatter.png ------------------------------------
+# --- Figure 1 (Fig_4A): pooled GT-vs-computer scatter -----------------------
 
 def create_pooled_scatter(
 	nesg_dirs: list[Path],
@@ -301,7 +301,7 @@ def create_pooled_scatter(
 	"""Pooled GT-vs-computer length scatter, common worms only, bucketed by shape."""
 	by_src = _collect_pooled_data_by_source(nesg_dirs, cp_dirs)
 	if not by_src:
-		print("[skip] all_categories_scatter: no valid common-worm data")
+		print("[skip] Fig_4A: no valid common-worm data")
 		return None
 
 	bucket_lookup = _build_pooled_bucket_lookup()
@@ -323,14 +323,14 @@ def create_pooled_scatter(
 		b["c_gt"].extend(cg.tolist())
 		b["c_comp"].extend(cc.tolist())
 	if unbucketed:
-		print(f"[warn] all_categories_scatter: source classes without a bucket: {sorted(unbucketed)}")
+		print(f"[warn] Fig_4A: source classes without a bucket: {sorted(unbucketed)}")
 
 	all_n_gt = [v for b in per_bucket.values() for v in b["n_gt"]]
 	all_n_comp = [v for b in per_bucket.values() for v in b["n_comp"]]
 	all_c_gt = [v for b in per_bucket.values() for v in b["c_gt"]]
 	all_c_comp = [v for b in per_bucket.values() for v in b["c_comp"]]
 	if not all_n_gt and not all_c_gt:
-		print("[skip] all_categories_scatter: no valid common-worm data after bucketing")
+		print("[skip] Fig_4A: no valid common-worm data after bucketing")
 		return None
 
 	all_vals = all_n_gt + all_n_comp + all_c_gt + all_c_comp
@@ -414,7 +414,7 @@ def create_pooled_scatter(
 	for txt in leg.get_texts():
 		txt.set_fontfamily("Arial")
 
-	out_path = output_root / "all_categories_scatter.png"
+	out_path = output_root / "Fig_4A.png"
 	fig.savefig(out_path, dpi=300)
 	fig.savefig(out_path.with_suffix(".svg"))
 	plt.close(fig)
@@ -422,7 +422,7 @@ def create_pooled_scatter(
 	return out_path
 
 
-# --- Figure 2: difference_boxplot.png (length %-error, NS vs CP) ------------
+# --- Figure 2 (Fig_4B): length %-error box plot, NS vs CP -------------------
 
 def _pretty_category_name(name: str) -> str:
 	overrides = {
@@ -496,13 +496,13 @@ def create_difference_boxplot(
 		if src in cat_nesg:
 			cat_nesg.setdefault(dst, []).extend(cat_nesg.pop(src))
 			cat_cp.setdefault(dst, []).extend(cat_cp.pop(src))
-			print(f"[difference_boxplot] merged {src} -> {dst}")
+			print(f"[Fig_4B] merged {src} -> {dst}")
 
 	if not cat_nesg:
-		print("[skip] difference_boxplot: no valid common-worm data")
+		print("[skip] Fig_4B: no valid common-worm data")
 		return None
 
-	print("[difference_boxplot] per-category common-worm sample sizes:")
+	print("[Fig_4B] per-category common-worm sample sizes:")
 	total_n = 0
 	for cat, vals in cat_nesg.items():
 		print(f"  {cat:<35} n={len(vals)}")
@@ -587,15 +587,15 @@ def create_difference_boxplot(
 	for txt in leg.get_texts():
 		txt.set_fontfamily("Arial")
 
-	out_path = output_root / "difference_boxplot.png"
+	out_path = output_root / "Fig_4B.png"
 	fig.savefig(out_path, dpi=300)
 	fig.savefig(out_path.with_suffix(".svg"))
 	plt.close(fig)
 	print(f"[ok] Saved: {out_path}")
 
 	_write_boxplot_stats(
-		output_root / "difference_boxplot_stats.txt",
-		title="Per-box statistics for difference_boxplot.png",
+		output_root / "Fig_4B_stats.txt",
+		title="Per-box statistics for Fig_4B.png",
 		value_desc="Values are percentage error of worm length (%): (computer - human) / human * 100",
 		display_cats=display_cats,
 		series_by_method={"NemaSize": cat_nesg, "CellProfiler": cat_cp},
@@ -603,7 +603,7 @@ def create_difference_boxplot(
 	return out_path
 
 
-# --- Figure 3: width_difference_boxplot.png (NemaSize only) -----------------
+# --- Figure 3 (Fig_S1): width %-error box plot, NemaSize only ---------------
 
 def create_width_difference_boxplot(
 	nesg_dirs: list[Path],
@@ -643,13 +643,13 @@ def create_width_difference_boxplot(
 	for src, dst in BOXPLOT_MERGE_MAP.items():
 		if src in cat_nesg:
 			cat_nesg.setdefault(dst, []).extend(cat_nesg.pop(src))
-			print(f"[width_boxplot] merged {src} -> {dst}")
+			print(f"[Fig_S1] merged {src} -> {dst}")
 
 	if not cat_nesg:
-		print("[skip] width_difference_boxplot: no valid width data")
+		print("[skip] Fig_S1: no valid width data")
 		return None
 
-	print("[width_boxplot] per-category sample sizes:")
+	print("[Fig_S1] per-category sample sizes:")
 	total_n = 0
 	for cat, vals in cat_nesg.items():
 		print(f"  {cat:<35} n={len(vals)}")
@@ -702,15 +702,15 @@ def create_width_difference_boxplot(
 	for lbl in ax.get_xticklabels() + ax.get_yticklabels():
 		lbl.set_fontfamily("Arial")
 
-	out_path = output_root / "width_difference_boxplot.png"
+	out_path = output_root / "Fig_S1.png"
 	fig.savefig(out_path, dpi=300)
 	fig.savefig(out_path.with_suffix(".svg"))
 	plt.close(fig)
 	print(f"[ok] Saved: {out_path}")
 
 	_write_boxplot_stats(
-		output_root / "width_difference_boxplot_stats.txt",
-		title="Per-box statistics for width_difference_boxplot.png",
+		output_root / "Fig_S1_stats.txt",
+		title="Per-box statistics for Fig_S1.png",
 		value_desc="Values are percentage error of worm width (%): (computer - human) / human * 100",
 		display_cats=display_cats,
 		series_by_method={"NemaSize": cat_nesg},
@@ -765,17 +765,17 @@ def main() -> None:
 	OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
 	saved = []
-	print("\n[1/3] Building all_categories_scatter.png ...")
+	print("\n[1/3] Building Fig_4A.png ...")
 	out = create_pooled_scatter(nesg_dirs, cp_dirs, OUTPUT_ROOT)
 	if out is not None:
 		saved.append(out)
 
-	print("\n[2/3] Building difference_boxplot.png ...")
+	print("\n[2/3] Building Fig_4B.png ...")
 	out = create_difference_boxplot(nesg_dirs, cp_dirs, OUTPUT_ROOT)
 	if out is not None:
 		saved.append(out)
 
-	print("\n[3/3] Building width_difference_boxplot.png ...")
+	print("\n[3/3] Building Fig_S1.png ...")
 	out = create_width_difference_boxplot(nesg_dirs, cp_dirs, OUTPUT_ROOT)
 	if out is not None:
 		saved.append(out)

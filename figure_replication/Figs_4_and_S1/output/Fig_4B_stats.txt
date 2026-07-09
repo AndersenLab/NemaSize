@@ -1,4 +1,4 @@
-Per-box statistics for difference_boxplot.png
+Per-box statistics for Fig_4B.png
 Values are percentage error of worm length (%): (computer - human) / human * 100
 
 category                            method            n       mean     median        std        q25        q75
