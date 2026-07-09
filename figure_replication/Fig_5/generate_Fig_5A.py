@@ -1,6 +1,6 @@
 """
-Box plot: median_wormlength_um per strain, NemaSize vs CellProfiler side by side.
-Each data point is one well (all concentrations pooled).
+Fig_5A: box plot of median_wormlength_um per strain, NemaSize vs CellProfiler
+side by side. Each data point is one well (all concentrations pooled).
 """
 
 import pandas as pd
@@ -18,7 +18,7 @@ OUTPUT_DIR = SCRIPT_DIR / "output"
 # ── Paths ─────────────────────────────────────────────────────────────────────
 NEMASIZE_PATH = DATA_DIR / "20260615_length_reg_delta_nemasize.csv"
 CELLPROFILER_PATH = DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
-OUT_PATH = OUTPUT_DIR / "worm_length_boxplot.svg"
+OUT_PATH = OUTPUT_DIR / "Fig_5A.svg"
 
 # ── Load & label ──────────────────────────────────────────────────────────────
 df_ns = pd.read_csv(NEMASIZE_PATH)

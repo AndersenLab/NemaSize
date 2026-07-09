@@ -1,6 +1,6 @@
 """
 EC10 / EC50 / EC90 + slope (b) estimation for dose-response datasets used by
-plot_dose_response.py. Python port of ec_estimates.R, which itself wraps
+generate_Fig_5D_and_E.py. Python port of ec_estimates.R, which itself wraps
 fit_DRC_models() + safe_EC() from master_anthDRmanuscript_analysis_script.R.
 
 Model: four-parameter log-logistic (drc::LL.4)
@@ -30,10 +30,10 @@ from scipy.stats import norm
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
-OUTPUT_DIR = SCRIPT_DIR / "output"
+OUTPUT_DIR = SCRIPT_DIR / "output" / "ec_estimates"
 
-# Same two CSVs as plot_dose_response.py. Both datasets analyse the SAME images;
-# they differ only in the processing tool (NemaSize vs CellProfiler).
+# Same two CSVs as generate_Fig_5D_and_E.py. Both datasets analyse the SAME
+# images; they differ only in the processing tool (NemaSize vs CellProfiler).
 DATASETS = [
     {
         "name": "NemaSize",
