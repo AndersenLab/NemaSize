@@ -69,7 +69,6 @@ The repo is organized into four top-level modules:
 |---|---|
 | `Figs_4_and_S1/` | Data + script to regenerate the NemaSize-vs-CellProfiler-vs-GT comparison figures |
 | `Fig_5/` | Dose-response / EC10-50-90 figures |
-| `roi_fov_calculations/` | Field-of-view calculations reported for select figures |
 
 ### `misc/`
 
@@ -81,6 +80,7 @@ The repo is organized into four top-level modules:
 | `exploratory_analysis/` | Exploratory QC plotting scripts |
 | `dataset_bookkeeping/` | Filename lookup / HPC data-wrangling utilities |
 | `standalone_utilities/` | Standalone tools not wired into the pipeline (`mask_well_imgs.py`, `config.example.json`) |
+| `roi_fov_calculations/` | Field-of-view calculations reported for select figures |
 | `SLURM_scripts/` | Example HPC submission scripts |
 
 ---
