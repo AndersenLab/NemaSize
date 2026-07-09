@@ -59,8 +59,9 @@ The repo is organized into four top-level modules:
 | `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO format |
 | `visualize_predictions.py` | Visualizations of YOLO inference results |
 | `visualize_contour_skeleton.py` | Visualizations of contours and skeletons output from the pipeline |
+| `flatten_categories.py` | Merge all dataset categories into a single category (via `dataset_manager.py`) |
+| `restore_categories.py` | Restore dataset categories from an automatic backup (via `dataset_manager.py`) |
 | `requirements.txt` | Required dependencies for the full pipeline |
-| `examples/` | Usage examples for `dataset_manager.py` (flatten/restore categories) |
 
 ### `figure_replication/`
 

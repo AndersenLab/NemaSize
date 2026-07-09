@@ -59,11 +59,11 @@ create_roi_dataset.py
 dataset_manager.py
 debug_o_shape.py
 debug_stitch_failure.py
-flatten_categories_example.py
+flatten_categories.py
 mask_well_imgs.py
 plot_gt_vs_pred_scatter.py
 plot_worm_stats.py
-restore_categories_example.py
+restore_categories.py
 rfdetr_inference.py
 train_rfdetr_segmentation.py
 train_yolo_segmentation.py

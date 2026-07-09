@@ -1,11 +1,9 @@
 """
-Quick script to restore categories from backup.
+Restore dataset categories from the automatic backup made by
+flatten_categories.py (or any other DatasetManager operation that
+backs up annotations before modifying them).
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from dataset_manager import DatasetManager
 
 def main():

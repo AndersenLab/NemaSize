@@ -1,12 +1,9 @@
 """
-Example script demonstrating how to flatten/merge all categories into a single category.
-This is useful when you want to detect objects (e.g., worms) without distinguishing between types.
+Flatten/merge all categories in a COCO-format dataset into a single category.
+This is useful when you want to detect objects (e.g., worms) without
+distinguishing between types.
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from dataset_manager import DatasetManager
 
 def main():
@@ -17,14 +14,14 @@ def main():
     manager = DatasetManager()
     
     print("="*70)
-    print("FLATTEN CATEGORIES EXAMPLE")
+    print("FLATTEN CATEGORIES")
     print("="*70)
     print("This will merge all worm categories into a single 'worms' category.")
     print("Original annotation files will be backed up automatically.")
     print("="*70)
     
-    # Example 1: Flatten categories for all splits
-    print("\n\nExample 1: Flatten all splits")
+    # Step 1: Flatten categories for all splits
+    print("\n\nStep 1: Flatten all splits")
     print("-" * 70)
     results = manager.flatten_categories(
         dataset_path=DATASET_PATH,
@@ -42,7 +39,7 @@ def main():
         print(f"  Annotations updated: {info['annotations_updated']}/{info['total_annotations']}")
         print(f"  Backup saved to: {info['backup_file']}")
     
-    # Example 2: Verify the flattened dataset
+    # Step 2: Verify the flattened dataset
     print("\n\n" + "="*70)
     print("VERIFY FLATTENED DATASET")
     print("="*70)
@@ -56,11 +53,11 @@ def main():
             print(f"\nChecking {split_name} split...")
             stats = manager.get_annotation_statistics(coco_path, verbose=True)
     
-    # Example 3: How to restore from backup if needed
+    # Step 3: How to restore from backup if needed
     print("\n\n" + "="*70)
     print("TO RESTORE CATEGORIES FROM BACKUP")
     print("="*70)
-    print("If you want to restore the original categories, use:")
+    print("If you want to restore the original categories, use restore_categories.py, or:")
     print(">>> results = manager.restore_categories_from_backup(")
     print(f"...     dataset_path='{DATASET_PATH}',")
     print("...     splits=['train', 'valid'],  # or None for all")
