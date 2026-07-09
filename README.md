@@ -58,7 +58,7 @@ The repo is organized into four top-level modules:
 | `augment_data.py` | data augmentation |
 | `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO format |
 | `visualize_predictions.py` | Visualizations of YOLO inference results |
-| `visualize_contour_skeleton.py` | Visualizations of inferred contours and skeletons |
+| `visualize_contour_skeleton.py` | Visualizations of contours and skeletons output from the pipeline |
 | `requirements.txt` | Required dependencies for the full pipeline |
 | `examples/` | Usage examples for `dataset_manager.py` (flatten/restore categories) |
 
