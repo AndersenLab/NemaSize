@@ -15,7 +15,7 @@ This repository can be cloned from: <https://github.com/AndersenLab/NemaSize>
 
 ## Overview of NemaSize
 
-NemaSize is AI-aided pipeline to measure nematode body sizes across complex posuture using multiscale learning and topology-aware skeletonization. NemaSize use a two-stage pipeline that turns raw well images into length and width measurements for individual worms:
+NemaSize is an AI-aided pipeline to measure nematode body sizes across complex posture using multiscale learning and topology-aware skeletonization. NemaSize uses a two-stage pipeline that turns raw well images into length and width measurements for individual worms:
 
 ```
 raw images ──► [Stage 1] YOLO26-WF detection  ──► per-worm ROI crops
@@ -41,8 +41,8 @@ The repo is organized into four top-level modules:
 |---|---|
 | [`source_code/`](source_code/) | Source code for the pipeline: training, detection, segmentation, and skeletonization |
 | [`figure_replication/`](figure_replication/) | Self-contained data, bundled `output/` folders, and scripts to regenerate the paper figures — has its own lightweight `requirements.txt` and needs no access to the full pipeline, models, or raw experimental data |
-| [`docker/`](docker/) | Source code for building the docker container and instrusctions for deployment |
-| [`misc/`](misc/) | Auxiliary or deprecated files during pipeline development (not required to run the pipeline) |
+| [`docker/`](docker/) | Source code for building the Docker container and instructions for deployment |
+| [`misc/`](misc/) | Miscellaneous or deprecated files accumulated during pipeline development (not required to run the pipeline) |
 
 ### `source_code/`
 
@@ -55,7 +55,7 @@ The repo is organized into four top-level modules:
 | `create_roi_dataset.py` | Build ROI image sets from full-well images for training YOLO26-WS |
 | `train_yolo_segmentation.py` | Train the YOLO segmentation models |
 | `dataset_manager.py` | Dataset utilities: split, augment, and visualization |
-| `augment_data.py` | data augmentation |
+| `augment_data.py` | Data augmentation |
 | `convert_coco_to_yolo_seg.py` | Convert COCO annotations to YOLO format |
 | `visualize_predictions.py` | Visualizations of YOLO inference results |
 | `visualize_contour_skeleton.py` | Visualizations of contours and skeletons output from the pipeline |
@@ -87,12 +87,12 @@ See [Reproducing the paper figures](#reproducing-the-paper-figures) below for ho
 
 | Folder | Purpose |
 |---|---|
-| `performance_evaluation/` | Scripts for performance evaluation |
-| `experimental_rfdetr/` | RF-DETR trainer/inference as an alternative method - experimental |
+| `performance_evaluation/` | Scripts for evaluating pipeline performance against ground truth and CellProfiler |
+| `experimental_rfdetr/` | RF-DETR trainer/inference — an experimental alternative segmentation method |
 | `debug/` | *Ad hoc* debugging scripts |
-| `preliminary_results_visualization/` | Preliminary scripts for result visualization |
+| `preliminary_results_visualization/` | Preliminary scripts for results visualization |
 | `dataset_bookkeeping/` | Data management utilities |
-| `preliminary_utilities/` | Preliminary utilities for pipeline construsction |
+| `preliminary_utilities/` | Preliminary utilities for pipeline construction |
 | `roi_fov_calculations/` | Field-of-view calculations for figure images |
 | `SLURM_scripts/` | Preliminary HPC submission scripts |
 
@@ -178,7 +178,7 @@ curl -L -o YOLO26-WF.pt https://github.com/AndersenLab/NemaSize/releases/downloa
 curl -L -o YOLO26-WS.pt https://github.com/AndersenLab/NemaSize/releases/download/v1.0.0/YOLO26-WS.pt
 ```
 
-Save the files on disk - you'll point the pipeline at them in the next step.
+Save the files to disk — you'll point the pipeline at them in the next step.
 
 #### 4. Run
 
@@ -192,7 +192,7 @@ Models can also be supplied via environment variables
 `NEMASIZE_DETECT_MODEL` and `NEMASIZE_SEG_MODEL`.
 
 > Internal note: `run_pipeline.py` also has hardcoded default model paths
-> for the authors' own machines/HPC - cluster paths by default, or local
+> for the authors' own machines/HPC — cluster paths by default, or local
 > paths if `--local` is passed. These paths won't exist for other users, so
 > always pass `--detect-model`/`--seg-model` (or the env vars above) instead.
 
@@ -226,6 +226,7 @@ One row per detected worm.
 | `Worm_ID` | Per-image ROI index (0, 1, 2, …) |
 | `Length_um` | Worm centerline length in **micrometers** |
 | `Width_um` | Mean body width in **micrometers** |
+| `Topology_Warnings` | `;`-joined flag codes for skeleton-topology fallbacks encountered during centerline extraction (e.g. `ring_fallthrough`, `fallback_a`, `fallback_b`, `traversal_failed`); empty if none fired |
 
 > **Filename convention:** the metadata columns above are populated by
 > parsing the source image name as
@@ -292,7 +293,7 @@ python source_code/train_yolo_segmentation.py
 ```
 
 Edit the dataset path and hyperparameters at the top of
-`train_yolo_segmentation.py`, then point it your custom datasets:
+`train_yolo_segmentation.py`, then point it at your custom datasets:
 
 - a full-well image dataset to train YOLO26-WF
 - the ROI dataset produced by `create_roi_dataset.py` to train YOLO26-WS
@@ -317,7 +318,7 @@ manager.process_dataset(
 ```
 
 Supported annotation formats: COCO, YOLO, Pascal VOC.
-Augmentations: rotation, intensity, Gaussian noise, and combinations. Annotations are transformed automatically.
+Augmentations: rotation, intensity, Gaussian noise, and combinations thereof. Annotations are transformed automatically.
 
 See [source_code/AUGMENTATION_GUIDE.md](source_code/AUGMENTATION_GUIDE.md) for
 details and `dataset_manager.py` for the full API.
@@ -365,4 +366,4 @@ pretrained models, or the Docker container:
 Bug reports, edge cases, and feedback are very welcome.
 
 - Zihao (John) Li: <lizihaojohn@outlook.com>
-- Erik Andersen (PI): <erik.andersen@gmail.com>
+- Erik C. Andersen (PI): <erik.andersen@gmail.com>
