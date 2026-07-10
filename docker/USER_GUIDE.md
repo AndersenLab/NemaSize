@@ -377,75 +377,9 @@ my_experiment/
             └── <image>_roi_<n>.txt   per-worm contour + skeleton coords
 ```
 
-### `worm_lengths.csv` columns
-
-One row per detected worm.
-
-| Column | Meaning |
-|---|---|
-| `Filename` | ROI filename (`<image>_roi_<n>.png`) |
-| `Date` | Date parsed from the source filename (e.g. `20260226`) |
-| `Metadata_Experiment` | Experiment tag parsed from filename (e.g. `cryassays`) |
-| `Metadata_Plate` | Plate tag parsed from filename (e.g. `p002`) |
-| `Magnification` | Magnification tag parsed from filename (e.g. `m2X`) |
-| `Metadata_Well` | Well ID parsed from filename (e.g. `F07`) |
-| `Worm_ID` | Per-image ROI index (0, 1, 2, …) |
-| `Length_um` | Worm centerline length in **micrometers** |
-| `Width_um` | Mean body width in **micrometers** |
-
-> **Filename convention:** the metadata columns above are populated by
-> parsing the source image name as
-> `YYYYMMDD-<experiment>-<plate>-<magnification>_<well>.tif`
-> (e.g. `20260226-cryassays-p002-m2X_F07.tif`). If your filenames
-> follow a different scheme, those metadata columns may be blank or
-> incorrect — only `Filename`, `Worm_ID`, `Length_um`, and `Width_um`
-> are guaranteed.
-
-> **Units:** `Length_um` and `Width_um` are already in micrometers. The
-> pipeline applies a built-in pixel-to-µm scale based on the
-> `m<magnification>` tag in the filename. If your filenames don't
-> carry magnification, you'll need to apply the conversion yourself
-> from pixel coordinates (see the per-worm `.txt` files below).
-
-### `contour_skeleton_txt/<image>_roi_<n>.txt`
-
-One file per worm. Plain text with two sections:
-
-```
-[CONTOUR]
-x y          ← outline polygon, normalized to [0, 1] of the ROI image
-x y
-...
-[SKELETON]
-x y          ← centerline polyline, normalized to [0, 1] of the ROI image
-x y
-...
-```
-
-To recover pixel coordinates, multiply by the ROI's width/height
-(available in `inference_rois/roi_catalog.json`). To recover original
-full-image coordinates, additionally apply the ROI's offset from the
-catalog.
-
-### `inference_rois/`
-
-- **`images/*.png`** — each detected worm cropped from the original
-  image. Useful for visual QC of the detector and for re-running just
-  the segmentation/skeleton stage.
-- **`roi_catalog.json`** — ROI bounding boxes and offsets, indexed by
-  source image. Required if you want to map results back to the
-  original full-resolution coordinates.
-
-### Visual QC
-
-This release does **not** generate annotated overlay images
-automatically. To inspect segmentation quality, you can either:
-
-- Open an ROI image (`inference_rois/images/<...>.png`) and overlay the
-  matching `[CONTOUR]` / `[SKELETON]` from the `.txt` file using your
-  tool of choice (Python, ImageJ, etc.), **or**
-- Use `visualize_contour_skeleton.py` from the source repo (not
-  bundled in the runtime image).
+See [../README.md §5. Outputs](../README.md#5-outputs) for the full output
+schema (`worm_lengths.csv` columns, the `.txt` contour/skeleton format,
+`roi_catalog.json`, and visual QC options).
 
 ---
 
