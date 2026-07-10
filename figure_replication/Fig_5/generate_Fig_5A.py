@@ -18,7 +18,8 @@ OUTPUT_DIR = SCRIPT_DIR / "output"
 # ── Paths ─────────────────────────────────────────────────────────────────────
 NEMASIZE_PATH = DATA_DIR / "20260615_length_reg_delta_nemasize.csv"
 CELLPROFILER_PATH = DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
-OUT_PATH = OUTPUT_DIR / "Fig_5A.svg"
+OUT_PATH_SVG = OUTPUT_DIR / "Fig_5A.svg"
+OUT_PATH_PNG = OUTPUT_DIR / "Fig_5A.png"
 
 # ── Load & label ──────────────────────────────────────────────────────────────
 df_ns = pd.read_csv(NEMASIZE_PATH)
@@ -109,8 +110,10 @@ ax.legend(handles=legend_handles, fontsize=FONT_SIZE, frameon=False,
           loc="upper left", bbox_to_anchor=(LEGEND_X, LEGEND_Y))
 
 # ── Save ──────────────────────────────────────────────────────────────────────
-OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 plt.tight_layout()
-fig.savefig(OUT_PATH, bbox_inches="tight")
-print(f"Saved: {OUT_PATH}")
+fig.savefig(OUT_PATH_SVG, bbox_inches="tight")
+print(f"Saved: {OUT_PATH_SVG}")
+fig.savefig(OUT_PATH_PNG, bbox_inches="tight", dpi=300)
+print(f"Saved: {OUT_PATH_PNG}")
 plt.close(fig)
