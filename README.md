@@ -171,34 +171,30 @@ my_experiment/
 #### 3. Download the pretrained models
 
 The trained YOLO26-WF (detection) and YOLO26-WS (segmentation) weights are distributed as
-[GitHub Release](https://github.com/AndersenLab/NemaSize/releases) assets:
+[GitHub Release](https://github.com/AndersenLab/NemaSize/releases/tag/v1.0.0) assets:
 
 ```bash
-curl -L -o detect.pt https://github.com/AndersenLab/NemaSize/releases/download/<tag>/detect.pt
-curl -L -o seg.pt    https://github.com/AndersenLab/NemaSize/releases/download/<tag>/seg.pt
+curl -L -o YOLO26-WF.pt https://github.com/AndersenLab/NemaSize/releases/download/v1.0.0/YOLO26-WF.pt
+curl -L -o YOLO26-WS.pt https://github.com/AndersenLab/NemaSize/releases/download/v1.0.0/YOLO26-WS.pt
 ```
 
-(Replace `<tag>` with the release version, e.g. `v1.0.1-beta`.) Save the
-files anywhere on disk — you'll point the pipeline at them in the next step.
+Save the files on disk - you'll point the pipeline at them in the next step.
 
 #### 4. Run
 
 ```bash
-# Local machine (uses the local model paths defined in run_pipeline.py)
-python source_code/run_pipeline.py /path/to/my_experiment --local
-
-# HPC / cluster (uses the cluster model paths)
-python source_code/run_pipeline.py /path/to/my_experiment
-
-# Override model weights directly
 python source_code/run_pipeline.py /path/to/my_experiment \
-    --detect-model /path/to/detect.pt \
-    --seg-model    /path/to/seg.pt
+    --detect-model /path/to/YOLO26-WF.pt \
+    --seg-model    /path/to/YOLO26-WS.pt
 ```
 
 Models can also be supplied via environment variables
-`NEMASIZE_DETECT_MODEL` and `NEMASIZE_SEG_MODEL` (this is how the Docker
-image points at its bundled weights).
+`NEMASIZE_DETECT_MODEL` and `NEMASIZE_SEG_MODEL`.
+
+> Internal note: `run_pipeline.py` also has hardcoded default model paths
+> for the authors' own machines/HPC - cluster paths by default, or local
+> paths if `--local` is passed. These paths won't exist for other users, so
+> always pass `--detect-model`/`--seg-model` (or the env vars above) instead.
 
 #### 5. Outputs
 
@@ -206,7 +202,7 @@ image points at its bundled weights).
 my_experiment/
 ├── inference_rois/
 │   ├── images/              ← per-worm ROI crops (.png)
-│   └── roi_catalog.json     ← ROI geometry for back-mapping
+│   └── roi_catalog.json     ← ROI geometry for mapping back to full-well images
 └── NemaSize_output/
     └── skeleton/
         ├── worm_lengths.csv         ← Length_um, Width_um per worm
