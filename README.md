@@ -6,6 +6,8 @@ Source code and data accompanying the manuscript:
 
 **Authors**: Zihao (John) Li, Amanda O. Shaver, Michael E.G. Sauria, Jack Weinstein, Maya K. Mastronardo, Nikita S. Jhaveri, Kate Stone, Rachel Choo, Colin Lilley, Esha Sharma, Rohan Shrishrimal, Grayson Benson, Ariel Shi, Cecilia Soko, and Erik C. Andersen*
 
+*Corresponding author
+
 **Affiliation**: Department of Biology, Johns Hopkins University, Baltimore, MD 21218, USA
 
 The manuscript will be deposited on bioRxiv.
@@ -42,7 +44,7 @@ The repo is organized into four top-level modules:
 | [`source_code/`](source_code/) | Source code for the pipeline: training, detection, segmentation, and skeletonization |
 | [`figure_replication/`](figure_replication/) | Self-contained data, bundled `output/` folders, and scripts to regenerate the paper figures — has its own lightweight `requirements.txt` and needs no access to the full pipeline, models, or raw experimental data |
 | [`docker/`](docker/) | Source code for building the Docker container and instructions for deployment |
-| [`misc/`](misc/) | Miscellaneous or deprecated files accumulated during pipeline development (not required to run the pipeline) |
+| [`misc/`](misc/) | Miscellaneous or deprecated files produced during pipeline development (not required to run the pipeline) |
 
 ### `source_code/`
 
@@ -87,8 +89,8 @@ See [Reproducing the paper figures](#reproducing-the-paper-figures) below for ho
 
 | Folder | Purpose |
 |---|---|
-| `performance_evaluation/` | Scripts for evaluating pipeline performance against ground truth and CellProfiler |
-| `experimental_rfdetr/` | RF-DETR trainer/inference — an experimental alternative segmentation method |
+| `performance_evaluation/` | Scripts for evaluating pipeline performance |
+| `experimental_rfdetr/` | RF-DETR trainer/inference - an experimental alternative segmentation method |
 | `debug/` | *Ad hoc* debugging scripts |
 | `preliminary_results_visualization/` | Preliminary scripts for results visualization |
 | `dataset_bookkeeping/` | Data management utilities |
@@ -178,7 +180,7 @@ curl -L -o YOLO26-WF.pt https://github.com/AndersenLab/NemaSize/releases/downloa
 curl -L -o YOLO26-WS.pt https://github.com/AndersenLab/NemaSize/releases/download/v1.0.0/YOLO26-WS.pt
 ```
 
-Save the files to disk — you'll point the pipeline at them in the next step.
+Save the files to disk. You'll point the pipeline at them in the next step.
 
 #### 4. Run
 
@@ -192,7 +194,7 @@ Models can also be supplied via environment variables
 `NEMASIZE_DETECT_MODEL` and `NEMASIZE_SEG_MODEL`.
 
 > Internal note: `run_pipeline.py` also has hardcoded default model paths
-> for the authors' own machines/HPC — cluster paths by default, or local
+> for the authors' own machines/HPC - cluster paths by default, or local
 > paths if `--local` is passed. These paths won't exist for other users, so
 > always pass `--detect-model`/`--seg-model` (or the env vars above) instead.
 
@@ -224,9 +226,9 @@ One row per detected worm.
 | `Magnification` | Magnification tag parsed from filename (e.g. `m2X`) |
 | `Metadata_Well` | Well ID parsed from filename (e.g. `F07`) |
 | `Worm_ID` | Per-image ROI index (0, 1, 2, …) |
-| `Length_um` | Worm centerline length in **micrometers** |
-| `Width_um` | Mean body width in **micrometers** |
-| `Topology_Warnings` | `;`-joined flag codes for skeleton-topology fallbacks encountered during centerline extraction (e.g. `ring_fallthrough`, `fallback_a`, `fallback_b`, `traversal_failed`); empty if none fired |
+| `Length_um` | Worm centerline length in micrometers |
+| `Width_um` | Mean body width in micrometers |
+| `Topology_Warnings` | flag codes for topology fallbacks encountered during centerline extraction; empty if none fired |
 
 > **Filename convention:** the metadata columns above are populated by
 > parsing the source image name as
@@ -293,7 +295,7 @@ python source_code/train_yolo_segmentation.py
 ```
 
 Edit the dataset path and hyperparameters at the top of
-`train_yolo_segmentation.py`, then point it at your custom datasets:
+`train_yolo_segmentation.py`, then point it to your custom datasets:
 
 - a full-well image dataset to train YOLO26-WF
 - the ROI dataset produced by `create_roi_dataset.py` to train YOLO26-WS
