@@ -333,6 +333,33 @@ For large datasets, a [Nextflow](https://www.nextflow.io/) pipeline,
 
 ---
 
+## License
+
+This repository is released under the [Apache License 2.0](LICENSE).
+
+---
+
+## Citation
+
+If you use NemaSize in your research, please cite:
+
+> Li Z, Shaver AO, Sauria MEG, Weinstein J, Mastronardo MK, Jhaveri NS,
+> Stone K, Choo R, Lilley C, Sharma E, Shrishrimal R, Benson G, Shi A,
+> Soko C, Andersen EC. *Multiscale learning and topological analysis
+> across complex postures enable robust nematode size quantification in
+> pharmacological assays*. bioRxiv (in preparation), 2026.
+
+*(BibTeX entry and DOI will be added once the manuscript is posted to
+bioRxiv / published.)*
+
+Please also cite the repository itself if you use the code, the
+pretrained models, or the Docker container:
+
+> NemaSize (v1.0.0) [Computer software]. Andersen Lab, Johns Hopkins
+> University. <https://github.com/AndersenLab/NemaSize>
+
+---
+
 ## Contact
 
 Bug reports, edge cases, and feedback are very welcome.
