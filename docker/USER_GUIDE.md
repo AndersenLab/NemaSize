@@ -241,12 +241,12 @@ If the GPU shows up inside the test container, you're ready.
 |---|---|---|
 | `zihaojohnli/nemasize:cpu` | ~1 GB / ~2.5 GB | No GPU, or just trying things out |
 | `zihaojohnli/nemasize:gpu` | ~3 GB / ~9 GB | NVIDIA GPU available; 5–20× faster |
-| `zihaojohnli/nemasize:1.0.2-beta-cpu` | same as `:cpu` | **Reproducibility** — pin this exact build |
-| `zihaojohnli/nemasize:1.0.2-beta-gpu` | same as `:gpu` | **Reproducibility** — pin this exact build |
+| `zihaojohnli/nemasize:1.0.0-cpu` | same as `:cpu` | **Reproducibility** — pin this exact build |
+| `zihaojohnli/nemasize:1.0.0-gpu` | same as `:gpu` | **Reproducibility** — pin this exact build |
 | `zihaojohnli/nemasize:latest` | same as `:cpu` | Default; equivalent to `:cpu` |
 
 > **For published research, ALWAYS use a versioned tag** (e.g.
-> `1.0.2-beta-cpu`) so your analysis is reproducible. The moving tags
+> `1.0.0-cpu`) so your analysis is reproducible. The moving tags
 > (`:cpu`, `:gpu`, `:latest`) will change when new builds are pushed.
 
 ### Pull
@@ -395,9 +395,9 @@ of MB) unless model weights or CUDA were updated.
 To **roll back** to a specific version:
 
 ```bash
-docker pull zihaojohnli/nemasize:1.0.2-beta-cpu
+docker pull zihaojohnli/nemasize:1.0.0-cpu
 docker run --rm -v "$(pwd)/my_experiment:/data" \
-    zihaojohnli/nemasize:1.0.2-beta-cpu /data
+    zihaojohnli/nemasize:1.0.0-cpu /data
 ```
 
 ---
@@ -508,7 +508,7 @@ process NEMASIZE {
 
 When something doesn't work, please collect and send:
 
-1. **Image tag you ran**: e.g. `zihaojohnli/nemasize:1.0.2-beta-cpu`
+1. **Image tag you ran**: e.g. `zihaojohnli/nemasize:1.0.0-cpu`
 2. **Full error output** from your terminal
 3. **Output of**:
    ```bash
@@ -524,4 +524,4 @@ Send to **Zihao (John) Li** <lizihaojohn@outlook.com> (cc **Erik C. Andersen**
 
 ---
 
-*Last updated: May 2026 · Version 1.0.2-beta*
+*Last updated: July 2026 · Version 1.0.0*
