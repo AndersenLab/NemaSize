@@ -264,42 +264,38 @@ catalog.
 ##### `inference_rois/`
 
 - **`images/*.png`** — each detected worm cropped from the original
-  image. Useful for visual QC of the detector and for re-running just
+  image. Useful for visual quality control of the detector and for re-running just
   the segmentation/skeleton stage.
 - **`roi_catalog.json`** — ROI bounding boxes and offsets, indexed by
   source image. Required if you want to map results back to the
   original full-resolution coordinates.
 
-##### Visual QC
+##### Visual quality control
 
 This release does **not** generate annotated overlay images
-automatically. To inspect segmentation quality, you can either:
-
-- Open an ROI image (`inference_rois/images/<...>.png`) and overlay the
-  matching `[CONTOUR]` / `[SKELETON]` from the `.txt` file using your
-  tool of choice (Python, ImageJ, etc.), **or**
-- Use `visualize_contour_skeleton.py` from `source_code/` (not bundled
-  in the Docker runtime image).
+automatically. To inspect segmentation quality, you can use `visualize_contour_skeleton.py`
+from `source_code/` (not bundled in the Docker runtime image).
 
 ---
 
 ### Training your own models
 
-#### Detection (Stage 1)
+Both YOLO26-WF (Stage 1) and YOLO26-WS (Stage 2) are Ultralytics YOLO26x-seg models trained with the same script. They differ only in what data they're trained on:
 
-Stage 1 is a stock Ultralytics YOLO detection model. Train it with the
-Ultralytics CLI/API on a COCO- or YOLO-format dataset of full-frame
-plate images annotated with worm bounding boxes.
-
-#### Segmentation (Stage 2)
+- **YOLO26-WF** was trained on full-well images annotated with per-worm
+  polygon masks.
+- **YOLO26-WS** was trained on the cropped ROI worm images with polygon
+  masks.
 
 ```bash
 python source_code/train_yolo_segmentation.py
 ```
 
 Edit the dataset path and hyperparameters at the top of
-`train_yolo_segmentation.py`. The training set is typically the output
-of `create_roi_dataset.py` (per-worm crops with polygon masks).
+`train_yolo_segmentation.py`, then point it your custom datasets:
+
+- a full-well image dataset to train YOLO26-WF
+- the ROI dataset produced by `create_roi_dataset.py` to train YOLO26-WS
 
 #### Dataset utilities
 
@@ -320,38 +316,26 @@ manager.process_dataset(
 )
 ```
 
-Supported annotation formats: **COCO** (recommended), YOLO, Pascal VOC.
-Augmentations: rotation, intensity, Gaussian noise, and combinations
-thereof — annotations are transformed automatically.
+Supported annotation formats: COCO, YOLO, Pascal VOC.
+Augmentations: rotation, intensity, Gaussian noise, and combinations. Annotations are transformed automatically.
 
 See [source_code/AUGMENTATION_GUIDE.md](source_code/AUGMENTATION_GUIDE.md) for
 details and `dataset_manager.py` for the full API.
 
 ---
 
-## Distribution
+## Parallelization on High-Performance Computing (HPC) cluster
 
-The pipeline is published as a Docker image:
+For large datasets, a [Nextflow](https://www.nextflow.io/) pipeline,
+**NemaSize-nf**, wraps this pipeline to parallelize runs on an HPC cluster:
 
-| Tag | Description |
-|---|---|
-| `zihaojohnli/nemasize:cpu` | CPU-only (~2.5 GB on disk) |
-| `zihaojohnli/nemasize:gpu` | NVIDIA CUDA 12.1 (~9 GB on disk) |
-| `zihaojohnli/nemasize:1.0.1-beta-cpu` / `-gpu` | Pinned versioned tags (use these for published research) |
-
-Build / publish instructions: [docker/DOCKER.md](docker/DOCKER.md).
-
-The image is also Singularity- and Nextflow-compatible (includes
-`procps`, built `--platform linux/amd64`).
+> <https://github.com/AndersenLab/NemaSize-nf>
 
 ---
 
-## Status
+## Contact
 
-NemaSize is currently in **public beta**. Bug reports, edge cases, and
-feedback on the user guide are very welcome.
+Bug reports, edge cases, and feedback are very welcome.
 
-**Contact**
-
-- Zihao John Li — <lizihaojohn@outlook.com>
+- Zihao (John) Li — <lizihaojohn@outlook.com>
 - Erik Andersen (PI) — <erik.andersen@gmail.com>
