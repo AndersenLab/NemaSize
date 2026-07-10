@@ -1995,8 +1995,8 @@ def _parse_filename_metadata(stem: str) -> tuple[str, str, str, str, str, str]:
     return date, experiment, plate_id, magnification, well_id, worm_id
 
 
-# Shared worm-length CSV schema used by both YOLO and GT modes.
-WORM_LENGTHS_CSV_COLUMNS = [
+# Shared worm-size CSV schema used by both YOLO and GT modes.
+WORM_SIZES_CSV_COLUMNS = [
     "Filename",
     "Date",
     "Metadata_Experiment",
@@ -2040,23 +2040,23 @@ def _collect_topology_warnings(caught_warnings) -> str:
     return ";".join(flags)
 
 
-def _init_worm_lengths_csv(output_dir: str) -> tuple[Path, object, csv.writer]:
-    """Create worm-length CSV file and write the shared header."""
-    csv_path = Path(output_dir) / "worm_lengths.csv"
+def _init_worm_sizes_csv(output_dir: str) -> tuple[Path, object, csv.writer]:
+    """Create worm-size CSV file and write the shared header."""
+    csv_path = Path(output_dir) / "worm_sizes.csv"
     csv_fh = open(csv_path, "w", newline="", encoding="utf-8")
     csv_writer = csv.writer(csv_fh)
-    csv_writer.writerow(WORM_LENGTHS_CSV_COLUMNS)
+    csv_writer.writerow(WORM_SIZES_CSV_COLUMNS)
     return csv_path, csv_fh, csv_writer
 
 
-def _build_worm_lengths_row(
+def _build_worm_sizes_row(
     filename: str,
     stem: str,
     length_um: float,
     width_um: float,
     topology_warnings: str = "",
 ) -> tuple[str, str, str, str, str, str, str, float, float, str]:
-    """Build one worm-length CSV row with parsed filename metadata.
+    """Build one worm-size CSV row with parsed filename metadata.
 
     ``topology_warnings`` is a ``;``-joined string of flag codes
     (see ``_collect_topology_warnings``) indicating that the skeleton
@@ -2520,8 +2520,8 @@ def skeletonize_worm_predictions(
     #                    well_id, worm_id, length_px, width_px) for every processed image.
     # length_px / width_px are in original-image pixel scale when an ROI catalog
     # is provided, otherwise in ROI pixel scale.  NaN when skeletonization failed.
-    worm_lengths: list[tuple[str, str, str, str, str, str, str, float, float]] = []
-    csv_path, _csv_fh, _csv_writer = _init_worm_lengths_csv(output_dir)
+    worm_sizes: list[tuple[str, str, str, str, str, str, str, float, float]] = []
+    csv_path, _csv_fh, _csv_writer = _init_worm_sizes_csv(output_dir)
 
     # ── Hang diagnostics ───────────────────────────────────────────────────
     # Write the filename of the image currently being processed to a small
@@ -2566,7 +2566,7 @@ def skeletonize_worm_predictions(
         """Per-image worker.  Raises TimeoutError if the wall-clock limit fires.
 
         Returns nothing.  Uses closure over the enclosing function's locals
-        (model, stats dict, worm_lengths list, csv writer, etc.).
+        (model, stats dict, worm_sizes list, csv writer, etc.).
         """
         img = cv2.imread(str(img_path))
         if img is None:
@@ -2900,7 +2900,7 @@ def skeletonize_worm_predictions(
             )
         _length = target_arc_length_orig_px if not np.isnan(target_arc_length_orig_px) else target_arc_length_px
         _width  = target_width_orig_px      if not np.isnan(target_width_orig_px)      else target_width_px
-        _row = _build_worm_lengths_row(
+        _row = _build_worm_sizes_row(
             filename=img_path.name,
             stem=img_path.stem,
             length_um=_length * UM_PER_PX if not np.isnan(_length) else float("nan"),
@@ -2943,7 +2943,7 @@ def skeletonize_worm_predictions(
                 _flags = _collect_topology_warnings(_caught_warns)
                 if _flags:
                     _row = _row[:-1] + (_flags,)
-                worm_lengths.append(_row)
+                worm_sizes.append(_row)
                 _csv_writer.writerow(_row)
             _stuck_fh.write(
                 f"END  \t{_time.strftime('%H:%M:%S')}\t{img_path.name}\t"
@@ -2989,7 +2989,7 @@ def skeletonize_worm_predictions(
         print(f"✓ Target masks      → {target_mask_dir}")
     if save_contour_skeleton_txt:
         print(f"✓ Contour/skeleton  → {contour_skel_dir}")
-    print(f"✓ Lengths & widths  → {csv_path}")
+    print(f"✓ Worm sizes        → {csv_path}")
     print("=" * 70 + "\n")
 
     # ---- finalize speed meter (writes nothing when disabled) ----
@@ -3008,7 +3008,7 @@ def skeletonize_worm_predictions(
             },
         )
 
-    return worm_lengths
+    return worm_sizes
 
 
 # ---------------------------------------------------------------------------
@@ -3263,8 +3263,8 @@ def skeletonize_gt_annotations(
         "total_annotations"     : 0,
         "successful_centerlines": 0,
     }
-    worm_lengths: list[tuple[str, str, str, str, str, str, str, float, float]] = []
-    csv_path, _csv_fh, _csv_writer = _init_worm_lengths_csv(output_dir)
+    worm_sizes: list[tuple[str, str, str, str, str, str, str, float, float]] = []
+    csv_path, _csv_fh, _csv_writer = _init_worm_sizes_csv(output_dir)
 
     # ── Per-image topology-warning capture ────────────────────────────────
     # Install a ``warnings.showwarning`` hook for the duration of the loop
@@ -3315,13 +3315,13 @@ def skeletonize_gt_annotations(
                     img_path.stem,
                     target_mask_dir / img_path.name,
                 )
-            _nan_row = _build_worm_lengths_row(
+            _nan_row = _build_worm_sizes_row(
                 filename=img_path.name,
                 stem=img_path.stem,
                 length_um=float("nan"),
                 width_um=float("nan"),
             )
-            worm_lengths.append(_nan_row)
+            worm_sizes.append(_nan_row)
             _csv_writer.writerow(_nan_row)
             continue
 
@@ -3345,13 +3345,13 @@ def skeletonize_gt_annotations(
                     img_path.stem,
                     target_mask_dir / img_path.name,
                 )
-            _nan_row = _build_worm_lengths_row(
+            _nan_row = _build_worm_sizes_row(
                 filename=img_path.name,
                 stem=img_path.stem,
                 length_um=float("nan"),
                 width_um=float("nan"),
             )
-            worm_lengths.append(_nan_row)
+            worm_sizes.append(_nan_row)
             _csv_writer.writerow(_nan_row)
             continue
 
@@ -3618,7 +3618,7 @@ def skeletonize_gt_annotations(
                 contour_skel_dir / (img_path.stem + ".txt"),
                 contour_max_points=contour_max_points,
             )
-        _row = _build_worm_lengths_row(
+        _row = _build_worm_sizes_row(
             filename=img_path.name,
             stem=img_path.stem,
             length_um=(
@@ -3631,7 +3631,7 @@ def skeletonize_gt_annotations(
             ),
             topology_warnings=_collect_topology_warnings(_gt_caught_warns),
         )
-        worm_lengths.append(_row)
+        worm_sizes.append(_row)
         _csv_writer.writerow(_row)
 
     # Restore the original warnings hook now that the loop is done.
@@ -3653,10 +3653,10 @@ def skeletonize_gt_annotations(
         print(f"✓ Target masks      → {target_mask_dir}")
     if save_contour_skeleton_txt:
         print(f"✓ Contour/skeleton  → {contour_skel_dir}")
-    print(f"✓ Lengths & widths  → {csv_path}")
+    print(f"✓ Worm sizes        → {csv_path}")
     print("=" * 70 + "\n")
 
-    return worm_lengths
+    return worm_sizes
 
 
 # ---------------------------------------------------------------------------
@@ -3903,7 +3903,7 @@ if __name__ == "__main__":
             ROI_CATALOG_PATH, len(image_dirs), "ROI_CATALOG_PATH"
         )
 
-        worm_lengths = []
+        worm_sizes = []
         completed_output_dirs = []
         for run_idx, (img_dir, out_dir, roi_path) in enumerate(
             zip(image_dirs, output_dirs, roi_catalog_paths), start=1
@@ -3952,7 +3952,7 @@ if __name__ == "__main__":
                 speed_device=_cli_args.speed_device,
                 device=_cli_args.device,
             )
-            worm_lengths.extend(run_rows)
+            worm_sizes.extend(run_rows)
             completed_output_dirs.append(out_dir)
 
     elif MODE == "gt":
@@ -4026,7 +4026,7 @@ if __name__ == "__main__":
             GT_ROI_CATALOG_PATH, len(gt_image_dirs), "GT_ROI_CATALOG_PATH"
         )
 
-        worm_lengths = []
+        worm_sizes = []
         completed_output_dirs = []
         for run_idx, (img_dir, lbl_dir, out_dir, roi_path) in enumerate(
             zip(gt_image_dirs, gt_labels_dirs, gt_output_dirs, gt_roi_catalog_paths), start=1
@@ -4071,7 +4071,7 @@ if __name__ == "__main__":
                 contour_max_points=CONTOUR_MAX_POINTS,
                 draw_annotation_text=DRAW_ANNOTATION_TEXT,
             )
-            worm_lengths.extend(run_rows)
+            worm_sizes.extend(run_rows)
             completed_output_dirs.append(out_dir)
 
     else:
@@ -4080,9 +4080,9 @@ if __name__ == "__main__":
 
     # CSV is already written inside each mode-specific function.
     if len(completed_output_dirs) == 1:
-        csv_path = Path(completed_output_dirs[0]) / "worm_lengths.csv"
-        print(f"✓ Worm lengths saved → {csv_path}")
+        csv_path = Path(completed_output_dirs[0]) / "worm_sizes.csv"
+        print(f"✓ Worm sizes saved → {csv_path}")
     else:
-        print("✓ Worm lengths saved:")
+        print("✓ Worm sizes saved:")
         for out_dir in completed_output_dirs:
-            print(f"  - {Path(out_dir) / 'worm_lengths.csv'}")
+            print(f"  - {Path(out_dir) / 'worm_sizes.csv'}")

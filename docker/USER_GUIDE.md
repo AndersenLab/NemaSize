@@ -372,13 +372,13 @@ my_experiment/
 │   └── roi_catalog.json              (ROI geometry for back-mapping)
 └── NemaSize_output/
     └── skeleton/
-        ├── worm_lengths.csv          ★ main results table
+        ├── worm_sizes.csv           ★ main results table
         └── contour_skeleton_txt/
             └── <image>_roi_<n>.txt   per-worm contour + skeleton coords
 ```
 
 See [../README.md §5. Outputs](../README.md#5-outputs) for the full output
-schema (`worm_lengths.csv` columns, the `.txt` contour/skeleton format,
+schema (`worm_sizes.csv` columns, the `.txt` contour/skeleton format,
 `roi_catalog.json`, and visual QC options).
 
 ---
@@ -439,7 +439,7 @@ CPU image instead, or upgrade the GPU.
   magnification expected by the model.
 - Open a few `inference_rois/images/*.png` files — do they show centered,
   isolated worms? If not, the detector misfired.
-- Spot-check `worm_lengths.csv` — are `Length_um` values in a plausible
+- Spot-check `worm_sizes.csv` — are `Length_um` values in a plausible
   range (adult worms are typically ~1000µm)? Implausible values
   usually mean the segmentation collapsed or merged multiple worms.
 - Report unusual cases to the maintainer (Section 12).

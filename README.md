@@ -206,12 +206,12 @@ my_experiment/
 │   └── roi_catalog.json              (ROI geometry for mapping back to full-well images)
 └── NemaSize_output/
     └── skeleton/
-        ├── worm_lengths.csv          ★ main results table
+        ├── worm_sizes.csv           ★ main results table
         └── contour_skeleton_txt/
             └── <image>_roi_<n>.txt   per-worm contour + skeleton coords
 ```
 
-##### `worm_lengths.csv` columns
+##### `worm_sizes.csv` columns
 
 One row per detected worm.
 
