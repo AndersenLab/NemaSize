@@ -32,7 +32,7 @@ This guide is for end users. You do **not** need to install Python, CUDA, PyTorc
 | OS | Windows 10/11, macOS 11+, or Linux (kernel 4.x+) |
 | RAM | 8 GB (16 GB recommended for large datasets) |
 | Disk | 5 GB free (image + outputs) |
-| Internet | Required once for image download (~2.5 GB) |
+| Internet | Required once for image download (~0.9 GB) |
 | GPU | **Not required** |
 
 ### Recommended (GPU image, 5–20× faster)
@@ -41,8 +41,8 @@ This guide is for end users. You do **not** need to install Python, CUDA, PyTorc
 |---|---|
 | GPU | NVIDIA GPU with ≥4 GB VRAM (8 GB recommended) |
 | Driver | NVIDIA driver ≥ 525.x (any driver from 2023 onward supports CUDA 12.1) |
-| Disk | 12 GB free (image is ~9 GB) |
-| Internet | Required once for image download (~6 GB) |
+| Disk | 12 GB free (image is ~9.2 GB) |
+| Internet | Required once for image download (~4 GB) |
 
 > **Apple Silicon Macs (M1/M2/M3):** the CPU image works but runs through
 > Rosetta emulation (≈2× slower than a native amd64 CPU). The GPU image is
@@ -235,8 +235,8 @@ If the GPU shows up inside the test container, you're ready.
 
 | Tag | Size (download / disk) | Use when |
 |---|---|---|
-| `zihaojohnli/nemasize:cpu` | ~1 GB / ~2.5 GB | No GPU, or just trying things out |
-| `zihaojohnli/nemasize:gpu` | ~3 GB / ~9 GB | NVIDIA GPU available; 5–20× faster |
+| `zihaojohnli/nemasize:cpu` | ~0.9 GB / ~2.5 GB | No GPU, or just trying things out |
+| `zihaojohnli/nemasize:gpu` | ~4 GB / ~9.2 GB | NVIDIA GPU available; 5–20× faster |
 | `zihaojohnli/nemasize:1.0.0-cpu` | same as `:cpu` | **Reproducibility** — pin this exact build |
 | `zihaojohnli/nemasize:1.0.0-gpu` | same as `:gpu` | **Reproducibility** — pin this exact build |
 | `zihaojohnli/nemasize:latest` | same as `:cpu` | Default; equivalent to `:cpu` |

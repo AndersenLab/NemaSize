@@ -169,7 +169,7 @@ build a GPU image without a GPU, but you cannot **test** it without one.
 docker build --platform linux/amd64 -f docker/Dockerfile.gpu -t nemasize:gpu .
 ```
 
-The GPU image is larger (~5–8 GB) because it includes CUDA + cuDNN runtime
+The GPU image is larger (~9.2 GB) because it includes CUDA + cuDNN runtime
 libraries.
 
 ---
