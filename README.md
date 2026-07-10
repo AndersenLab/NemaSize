@@ -4,9 +4,9 @@ Source code and data accompanying the manuscript:
 
 "**Multiscale learning and topological analysis across complex postures enable robust nematode size quantification in pharmacological assays**"
 
-Authors: Zihao (John) Li, Amanda O. Shaver, Michael E.G. Sauria, Jack Weinstein, Maya K. Mastronardo, Nikita S. Jhaveri, Kate Stone, Rachel Choo, Colin Lilley, Esha Sharma, Rohan Shrishrimal, Grayson Benson, Ariel Shi, Cecilia Soko, and Erik C. Andersen*
+**Authors**: Zihao (John) Li, Amanda O. Shaver, Michael E.G. Sauria, Jack Weinstein, Maya K. Mastronardo, Nikita S. Jhaveri, Kate Stone, Rachel Choo, Colin Lilley, Esha Sharma, Rohan Shrishrimal, Grayson Benson, Ariel Shi, Cecilia Soko, and Erik C. Andersen*
 
-Affiliation: Department of Biology, Johns Hopkins University, Baltimore, MD 21218, USA
+**Affiliation**: Department of Biology, Johns Hopkins University, Baltimore, MD 21218, USA
 
 The manuscript will be deposited on bioRxiv.
 This repository can be cloned from: <https://github.com/AndersenLab/NemaSize>
@@ -73,6 +73,16 @@ The repo is organized into four top-level modules:
 
 See [Reproducing the paper figures](#reproducing-the-paper-figures) below for how to run these scripts.
 
+### `docker/`
+
+| File | Purpose |
+|---|---|
+| `Dockerfile.cpu` | Build the image running on CPU |
+| `Dockerfile.gpu` | Build the image running on GPU |
+| `requirements-runtime.txt` | Runtime dependencies bundled into the image |
+| `USER_GUIDE.md` | User guide for running the pipeline using Docker container |
+| `DOCKER.md` | Build / deployment instructions for the Docker image |
+
 ### `misc/`
 
 | Folder | Purpose |
@@ -124,33 +134,31 @@ statistics (`.txt`/`.csv`) to the `output/` folder, e.g.
 
 ---
 
-### End users
+## Instructions for running NemaSize
 
-If you just want to **run the pipeline on your own images**, use the
-Docker image — you do not need Python, CUDA, or any of the source code:
+There are two options to run the NemaSize pipeline:
+- [Option 1: Using Docker container](#option-1-using-docker-container)
+- [Option 2: Using source code](#option-2-using-source-code)
 
-> 📘 **Beta-tester guide:** [docker/USER_GUIDE.md](docker/USER_GUIDE.md)
->
-> ```bash
-> docker pull zihaojohnli/nemasize:cpu        # or :gpu
-> docker run --rm -v /path/to/my_experiment:/data zihaojohnli/nemasize:cpu /data
-> ```
+### Option 1: Using Docker container
 
-### Developers / model trainers
+If you just want to run the pipeline on your own images, the easiest option is to use the
+Docker image. You do not need to install dependencies or use any of the source code.
+
+Follow the Docker instructions: [docker/USER_GUIDE.md](docker/USER_GUIDE.md)
+
+### Option 2: Using source code
 
 If you want to retrain the detection or segmentation models, augment
-data, or modify the pipeline, keep reading.
+data, or modify the pipeline, run from source code.
 
-
-## Quick start (running the pipeline from source)
-
-### 1. Install
+#### 1. Install
 
 ```bash
 pip install -r source_code/requirements.txt
 ```
 
-### 2. Organize your data
+#### 2. Organize your data
 
 ```
 my_experiment/
@@ -160,7 +168,20 @@ my_experiment/
     └── ...
 ```
 
-### 3. Run
+#### 3. Download the pretrained models
+
+The trained YOLO26-WF (detection) and YOLO26-WS (segmentation) weights are distributed as
+[GitHub Release](https://github.com/AndersenLab/NemaSize/releases) assets:
+
+```bash
+curl -L -o detect.pt https://github.com/AndersenLab/NemaSize/releases/download/<tag>/detect.pt
+curl -L -o seg.pt    https://github.com/AndersenLab/NemaSize/releases/download/<tag>/seg.pt
+```
+
+(Replace `<tag>` with the release version, e.g. `v1.0.1-beta`.) Save the
+files anywhere on disk — you'll point the pipeline at them in the next step.
+
+#### 4. Run
 
 ```bash
 # Local machine (uses the local model paths defined in run_pipeline.py)
@@ -179,7 +200,7 @@ Models can also be supplied via environment variables
 `NEMASIZE_DETECT_MODEL` and `NEMASIZE_SEG_MODEL` (this is how the Docker
 image points at its bundled weights).
 
-### 4. Outputs
+#### 5. Outputs
 
 ```
 my_experiment/
@@ -197,15 +218,15 @@ for the full output schema.
 
 ---
 
-## Training your own models
+### Training your own models
 
-### Detection (Stage 1)
+#### Detection (Stage 1)
 
 Stage 1 is a stock Ultralytics YOLO detection model. Train it with the
 Ultralytics CLI/API on a COCO- or YOLO-format dataset of full-frame
 plate images annotated with worm bounding boxes.
 
-### Segmentation (Stage 2)
+#### Segmentation (Stage 2)
 
 ```bash
 python source_code/train_yolo_segmentation.py
@@ -215,7 +236,7 @@ Edit the dataset path and hyperparameters at the top of
 `train_yolo_segmentation.py`. The training set is typically the output
 of `create_roi_dataset.py` (per-worm crops with polygon masks).
 
-### Dataset utilities
+#### Dataset utilities
 
 `dataset_manager.py` handles split, augment, visualize, and format
 conversion in one place. Most users only need (run from inside `source_code/`,
