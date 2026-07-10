@@ -40,9 +40,9 @@ The repo is organized into four top-level modules:
 | Module | Purpose |
 |---|---|
 | [`source_code/`](source_code/) | Source code for the pipeline: training, detection, segmentation, and skeletonization |
-| [`figure_replication/`](figure_replication/) | Self-contained data and scripts to replicate the paper figures |
+| [`figure_replication/`](figure_replication/) | Self-contained data, bundled `output/` folders, and scripts to regenerate the paper figures — has its own lightweight `requirements.txt` and needs no access to the full pipeline, models, or raw experimental data |
 | [`docker/`](docker/) | Source code for building the docker container and instrusctions for deployment |
-| [`misc/`](misc/) | Archieve of auxiliary scripts not required to run the pipeline |
+| [`misc/`](misc/) | Auxiliary or deprecated files during pipeline development (not required to run the pipeline) |
 
 ### `source_code/`
 
@@ -65,23 +65,62 @@ The repo is organized into four top-level modules:
 
 ### `figure_replication/`
 
-| Folder | Purpose |
+| File / folder | Purpose |
 |---|---|
 | `Figs_4_and_S1/` | Data and scripts to regenerate Figs. 4 and S1 |
 | `Fig_5/` | Data and scripts to regenerate Fig. 5 |
+| `requirements.txt` | Lightweight dependencies required by both figure folders |
+
+See [Reproducing the paper figures](#reproducing-the-paper-figures) below for how to run these scripts.
 
 ### `misc/`
 
 | Folder | Purpose |
 |---|---|
-| `full_evaluation_pipeline/` | Full evaluation codebase behind `figure_replication/Figs_4_and_S1` (mask matching, stats) |
-| `experimental_rfdetr/` | (Optional) RF-DETR segmentation trainer/inference — experimental, not part of the documented pipeline |
-| `debug/` | One-off debugging scripts |
-| `exploratory_analysis/` | Exploratory QC plotting scripts |
-| `dataset_bookkeeping/` | Filename lookup / HPC data-wrangling utilities |
-| `standalone_utilities/` | Standalone tools not wired into the pipeline (`mask_well_imgs.py`, `config.example.json`) |
-| `roi_fov_calculations/` | Field-of-view calculations reported for select figures |
-| `SLURM_scripts/` | Example HPC submission scripts |
+| `performance_evaluation/` | Scripts for performance evaluation |
+| `experimental_rfdetr/` | RF-DETR trainer/inference as an alternative method - experimental |
+| `debug/` | *Ad hoc* debugging scripts |
+| `preliminary_results_visualization/` | Preliminary scripts for result visualization |
+| `dataset_bookkeeping/` | Data management utilities |
+| `preliminary_utilities/` | Preliminary utilities for pipeline construsction |
+| `roi_fov_calculations/` | Field-of-view calculations for figure images |
+| `SLURM_scripts/` | Preliminary HPC submission scripts |
+
+---
+
+## Reproducing the paper figures
+
+Each figure has its own self-contained folder under `figure_replication/`
+with bundled input data and an `output/` folder.
+
+### 1. Install required dependencies
+
+```bash
+pip install -r figure_replication/requirements.txt
+```
+
+### 2. Run
+
+Each script resolves its data/output paths relative to its own location, so
+run it from inside its folder:
+
+```bash
+# Figs. 4 and S1
+cd figure_replication/Figs_4_and_S1
+python generate_figures.py
+
+# Fig. 5
+cd figure_replication/Fig_5
+python generate_Fig_5A.py
+python generate_Fig_5D_and_E.py
+python calculate_ec_estimates.py
+```
+
+### 3. Outputs
+
+Each script generates figures (`.svg`/`.png`) and any accompanying
+statistics (`.txt`/`.csv`) to the `output/` folder, e.g.
+`figure_replication/Fig_5/output/Fig_5A.png`.
 
 ---
 
