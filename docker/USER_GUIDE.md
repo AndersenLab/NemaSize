@@ -1,13 +1,8 @@
 # NemaSize deployment using Docker container
 
-See [../README.md#overview-of-nemasize](../README.md#overview-of-nemasize) for
-details about NemaSize.
+For overview about NemaSize, see [../README.md#overview-of-nemasize](../README.md#overview-of-nemasize).
 
 This guide is for end users. You do **not** need to install Python, CUDA, PyTorch, or any other dependencies. Only Docker is needed.
-
-> Please report bugs, unexpected results, or unclear
-> documentation to **Zihao (John) Li** (<lizihaojohn@outlook.com>), with
-> **Erik C. Andersen** (<erik.andersen@gmail.com>) cc'd.
 
 ---
 
