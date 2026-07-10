@@ -364,5 +364,5 @@ pretrained models, or the Docker container:
 
 Bug reports, edge cases, and feedback are very welcome.
 
-- Zihao (John) Li — <lizihaojohn@outlook.com>
-- Erik Andersen (PI) — <erik.andersen@gmail.com>
+- Zihao (John) Li: <lizihaojohn@outlook.com>
+- Erik Andersen (PI): <erik.andersen@gmail.com>
