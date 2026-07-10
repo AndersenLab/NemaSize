@@ -1,14 +1,12 @@
-# NemaSize — Installation & Usage Guide (Beta)
+# NemaSize deployment using Docker container
 
-Automated *C. elegans* body-length and width measurement from microscope images.
-Two-stage pipeline: **YOLO detection → ROI segmentation → centerline skeletonization**.
+Details about NemaSize (link to main readme section)
 
-This guide is for **end users (other labs)**. You do **not** need to install
-Python, CUDA, PyTorch, or any other scientific package — only Docker.
+This guide is for end users. You do **not** need to install Python, CUDA, PyTorch, or any other dependencies. Only Docker is needed.
 
-> **Beta software.** Please report bugs, unexpected results, or unclear
-> documentation to **Zihao John Li** (<lizihaojohn@outlook.com>), with **Erik
-> Andersen** (<erik.andersen@gmail.com>) cc'd.
+> Please report bugs, unexpected results, or unclear
+> documentation to **Zihao (John) Li** (<lizihaojohn@outlook.com>), with
+> **Erik C. Andersen** (<erik.andersen@gmail.com>) cc'd.
 
 ---
 
@@ -243,12 +241,12 @@ If the GPU shows up inside the test container, you're ready.
 |---|---|---|
 | `zihaojohnli/nemasize:cpu` | ~1 GB / ~2.5 GB | No GPU, or just trying things out |
 | `zihaojohnli/nemasize:gpu` | ~3 GB / ~9 GB | NVIDIA GPU available; 5–20× faster |
-| `zihaojohnli/nemasize:1.0.1-beta-cpu` | same as `:cpu` | **Reproducibility** — pin this exact build |
-| `zihaojohnli/nemasize:1.0.1-beta-gpu` | same as `:gpu` | **Reproducibility** — pin this exact build |
+| `zihaojohnli/nemasize:1.0.2-beta-cpu` | same as `:cpu` | **Reproducibility** — pin this exact build |
+| `zihaojohnli/nemasize:1.0.2-beta-gpu` | same as `:gpu` | **Reproducibility** — pin this exact build |
 | `zihaojohnli/nemasize:latest` | same as `:cpu` | Default; equivalent to `:cpu` |
 
 > **For published research, ALWAYS use a versioned tag** (e.g.
-> `1.0.1-beta-cpu`) so your analysis is reproducible. The moving tags
+> `1.0.2-beta-cpu`) so your analysis is reproducible. The moving tags
 > (`:cpu`, `:gpu`, `:latest`) will change when new builds are pushed.
 
 ### Pull
@@ -369,7 +367,7 @@ my_experiment/
 ├── raw_images/                       (unchanged input)
 ├── inference_rois/
 │   ├── images/                       (cropped per-worm ROIs, .png)
-│   └── roi_catalog.json              (ROI geometry for back-mapping)
+│   └── roi_catalog.json              (ROI geometry for mapping back to full-well images)
 └── NemaSize_output/
     └── skeleton/
         ├── worm_sizes.csv           ★ main results table
@@ -397,9 +395,9 @@ of MB) unless model weights or CUDA were updated.
 To **roll back** to a specific version:
 
 ```bash
-docker pull zihaojohnli/nemasize:1.0.1-beta-cpu
+docker pull zihaojohnli/nemasize:1.0.2-beta-cpu
 docker run --rm -v "$(pwd)/my_experiment:/data" \
-    zihaojohnli/nemasize:1.0.1-beta-cpu /data
+    zihaojohnli/nemasize:1.0.2-beta-cpu /data
 ```
 
 ---
@@ -437,8 +435,8 @@ CPU image instead, or upgrade the GPU.
 ### Pipeline runs but outputs look wrong
 - Confirm input images contain *C. elegans* worms at roughly the
   magnification expected by the model.
-- Open a few `inference_rois/images/*.png` files — do they show centered,
-  isolated worms? If not, the detector misfired.
+- Open a few `inference_rois/images/*.png` files — do they show individual centered
+  worms? If not, the detector misfired.
 - Spot-check `worm_sizes.csv` — are `Length_um` values in a plausible
   range (adult worms are typically ~1000µm)? Implausible values
   usually mean the segmentation collapsed or merged multiple worms.
@@ -479,7 +477,8 @@ docker run --rm \
 ```
 
 **Q: How do I cite NemaSize?**
-A: *(citation info goes here once published)*
+A: See [../README.md#citation](../README.md#citation) for the citation and
+BibTeX/DOI details.
 
 **Q: Does it work on Singularity / Apptainer (HPC clusters)?**
 A: Yes. Convert with:
@@ -509,7 +508,7 @@ process NEMASIZE {
 
 When something doesn't work, please collect and send:
 
-1. **Image tag you ran**: e.g. `zihaojohnli/nemasize:1.0.1-beta-cpu`
+1. **Image tag you ran**: e.g. `zihaojohnli/nemasize:1.0.2-beta-cpu`
 2. **Full error output** from your terminal
 3. **Output of**:
    ```bash
@@ -520,9 +519,9 @@ When something doesn't work, please collect and send:
 4. **A small example dataset** that reproduces the problem (1–3 images
    are usually enough), or a description of the input characteristics.
 
-Send to **Zihao John Li** <lizihaojohn@outlook.com> (cc **Erik Andersen**
+Send to **Zihao (John) Li** <lizihaojohn@outlook.com> (cc **Erik C. Andersen**
 <erik.andersen@gmail.com>).
 
 ---
 
-*Last updated: May 2026 · Version 1.0.1-beta*
+*Last updated: May 2026 · Version 1.0.2-beta*

@@ -1,11 +1,11 @@
-# NemaSize Docker Guide
+# NemaSize Docker Maintainer Guide
 
 A complete, beginner-friendly walkthrough for **packaging NemaSize as a Docker
 image** and **distributing it to other labs** via Docker Hub.
 
-There are two audiences in this document:
-1. **You (the maintainer)** — sections [1](#1-install-docker) → [6](#6-publish-to-docker-hub).
-2. **End users (other labs)** — section [7](#7-end-user-instructions-share-this-with-other-labs).
+This document is for **maintainers** building and publishing the Docker
+image. If you just want to *run* the pipeline via Docker, see
+[USER_GUIDE.md](USER_GUIDE.md) instead.
 
 ---
 
@@ -85,16 +85,16 @@ The Dockerfiles bake the trained models into the image. Create a `weights/`
 folder in the repo root with **two files at exactly these names**:
 
 ```
-NemaSeg/
+NemaSize/
 ├── docker/
 │   ├── Dockerfile.cpu
 │   ├── Dockerfile.gpu
 │   ├── requirements-runtime.txt
-│   └── DOCKER.md
+│   └── MAINTAINER_GUIDE.md
 ├── .dockerignore        ← MUST stay at repo root
 ├── weights/
-│   ├── detect.pt   ← YOLO detector  (was: runs/segment/worm_seg_train/weights/best.pt)
-│   └── seg.pt      ← YOLO ROI segmenter (was: runs/.../roi_seg_train_fix_overlap/weights/best.pt)
+│   ├── detect.pt   ← YOLO26-WF detector
+│   └── seg.pt      ← YOLO26-WS ROI segmenter
 ├── source_code/
 │   ├── run_pipeline.py
 │   ├── detect_and_crop_rois.py
@@ -111,13 +111,17 @@ NemaSeg/
 > the context to be the repo root (so Docker can see all the source files),
 > `.dockerignore` must live there too.
 
+Use the same pretrained weights end users download from the
+[GitHub Release](https://github.com/AndersenLab/NemaSize/releases/tag/v1.0.0)
+(or point these at a newer locally-trained checkpoint before a new release):
+
 PowerShell:
 
 ```powershell
-cd C:\Users\jl200\source\repos\NemaSeg
+cd C:\path\to\NemaSize
 mkdir weights -ErrorAction SilentlyContinue
-Copy-Item "C:\Users\jl200\Dropbox\JHU_2026_spring\NemaSeg\runs\segment\worm_seg_train\weights\best.pt" weights\detect.pt
-Copy-Item "C:\Users\jl200\Dropbox\JHU_2026_spring\NemaSeg\runs\roi_yolo_segment_fix_overlap\roi_seg_train_fix_overlap\weights\best.pt" weights\seg.pt
+curl.exe -L -o weights\detect.pt https://github.com/AndersenLab/NemaSize/releases/download/v1.0.0/YOLO26-WF.pt
+curl.exe -L -o weights\seg.pt    https://github.com/AndersenLab/NemaSize/releases/download/v1.0.0/YOLO26-WS.pt
 ```
 
 > **Note:** add `weights/` to `.gitignore` so model files are not committed to git.
@@ -278,74 +282,13 @@ docker push --all-tags YOURNAME/nemasize
 
 ---
 
-## 7. End-user instructions (share this with other labs)
+## 7. Share the image with other labs
 
-> Copy-paste this section into your README or release notes.
-
-### Requirements
-- Docker Desktop (Windows/Mac) or Docker Engine (Linux).
-- For GPU acceleration: NVIDIA GPU + recent driver.
-
-### Get the image (~2 GB CPU / ~6 GB GPU; one-time download)
-
-```bash
-docker pull YOURNAME/nemasize:cpu          # CPU version
-docker pull YOURNAME/nemasize:gpu          # GPU version (needs --gpus all)
-```
-
-### Prepare your data
-
-Put the microscope images you want to analyze in a folder structured like:
-
-```
-my_experiment/
-└── raw_images/
-    ├── plate_001.tif
-    ├── plate_002.tif
-    └── ...
-```
-
-### Run
-
-**Linux / Mac:**
-
-```bash
-docker run --rm \
-  -v "$(pwd)/my_experiment:/data" \
-  YOURNAME/nemasize:cpu \
-  /data
-```
-
-**Windows (PowerShell):**
-
-```powershell
-docker run --rm `
-  -v "${PWD}\my_experiment:/data" `
-  YOURNAME/nemasize:cpu `
-  /data
-```
-
-**GPU:** add `--gpus all` and use the `:gpu` tag.
-
-### Outputs
-
-Results are written back to your host folder:
-
-```
-my_experiment/
-├── raw_images/
-├── inference_rois/                # cropped worm ROIs
-└── NemaSize_output/
-    └── skeleton/                  # CSV measurements + visualizations
-```
-
-### Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| `permission denied` on Linux outputs | Add `--user $(id -u):$(id -g)` to the `docker run` command. |
-| `could not select device driver "" with capabilities: [[gpu]]` | Install nvidia-container-toolkit (Linux) or update Docker Desktop + NVIDIA driver (Windows). |
-| Out of memory on CPU run | Process fewer images at a time, or use the GPU image. |
+Don't write end-user instructions here — [USER_GUIDE.md](USER_GUIDE.md)
+already covers installation, running the pipeline, understanding outputs,
+troubleshooting, and FAQ for end users. Once you've pushed a new tag,
+just make sure `USER_GUIDE.md`'s image tags/version references are current
+(see §6b above for the tags you just pushed).
 
 ---
 

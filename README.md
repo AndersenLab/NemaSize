@@ -83,7 +83,7 @@ See [Reproducing the paper figures](#reproducing-the-paper-figures) below for ho
 | `Dockerfile.gpu` | Build the image running on GPU |
 | `requirements-runtime.txt` | Runtime dependencies bundled into the image |
 | `USER_GUIDE.md` | User guide for running the pipeline using Docker container |
-| `DOCKER.md` | Build / deployment instructions for the Docker image |
+| `MAINTAINER_GUIDE.md` | Build / publish instructions for maintainers |
 
 ### `misc/`
 
