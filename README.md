@@ -10,7 +10,7 @@ Source code and data accompanying the manuscript:
 
 **Affiliation**: Department of Biology, Johns Hopkins University, Baltimore, MD 21218, USA
 
-The manuscript will be deposited on bioRxiv.
+The manuscript has been deposited on [bioRxiv](https://doi.org/10.64898/2026.07.12.738008).
 This repository can be cloned from: <https://github.com/AndersenLab/NemaSize>
 
 ---
@@ -350,10 +350,9 @@ If you use NemaSize in your research, please cite:
 > Stone K, Choo R, Lilley C, Sharma E, Shrishrimal R, Benson G, Shi A,
 > Soko C, Andersen EC. *Multiscale learning and topological analysis
 > across complex postures enable robust nematode size quantification in
-> pharmacological assays*. bioRxiv (in preparation), 2026.
+> pharmacological assays*. bioRxiv, 2026.
 
-*(BibTeX entry and DOI will be added once the manuscript is posted to
-bioRxiv / published.)*
+doi: [https://doi.org/10.64898/2026.07.12.738008](https://doi.org/10.64898/2026.07.12.738008)
 
 Please also cite the repository itself if you use the code, the
 pretrained models, or the Docker container:
