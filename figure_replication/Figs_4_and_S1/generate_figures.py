@@ -384,7 +384,7 @@ def create_pooled_scatter(
 	pub_ticks = np.arange(200, 1201, 200)
 	ax.set_xticks(pub_ticks)
 	ax.set_yticks(pub_ticks)
-	ax.set_xlabel("Ground-truth animal length (\u00b5m)", fontfamily="Arial", fontsize=PUB_AXIS_FONTSIZE)
+	ax.set_xlabel("Human measured animal length (\u00b5m)", fontfamily="Arial", fontsize=PUB_AXIS_FONTSIZE)
 	ax.set_ylabel("Computer measured animal length (\u00b5m)", fontfamily="Arial", fontsize=PUB_AXIS_FONTSIZE)
 	ax.grid(False)
 	for side in ("top", "right"):

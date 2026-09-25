@@ -95,7 +95,7 @@ def plot_dose_response(agg_norm, out_path: Path, norm_ylim) -> None:
     ax2.set_xscale("log")
     ax2.set_ylim(norm_ylim)
     ax2.yaxis.set_major_locator(ticker.MultipleLocator(100))
-    ax2.set_xlabel("Concentration (nM)", fontsize=NORM_LABEL_SIZE)
+    ax2.set_xlabel("Ivermectin concentration (nM)", fontsize=NORM_LABEL_SIZE)
     ax2.set_ylabel("Normalized animal length (µm)", fontsize=NORM_LABEL_SIZE)
     ax2.legend(fontsize=NORM_LEGEND_SIZE, frameon=False, loc="lower left")
     ax2.spines["top"].set_visible(False)
