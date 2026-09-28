@@ -41,6 +41,7 @@ MODEL3 = "L1_N2_HB101_100w.xml"
 MODEL4 = "MDHD.xml"
 
 METADATA_CSV_NAME = "metadata.csv"
+IMAGES_SUBDIR = "raw_images"  # images live here instead of the work dir root
 
 
 def build(n_images: int | None = None) -> Path:
@@ -51,6 +52,7 @@ def build(n_images: int | None = None) -> Path:
     """
     work = OUT_DIR
     (work / "output").mkdir(parents=True, exist_ok=True)
+    (work / IMAGES_SUBDIR).mkdir(parents=True, exist_ok=True)
 
     # -- worm models + well mask --------------------------------------------
     for model in (MODEL1, MODEL2, MODEL3, MODEL4):
@@ -84,13 +86,13 @@ def build(n_images: int | None = None) -> Path:
     rows = [header]
     wells = [f"{r}{c:02d}" for r in "ABCDEFGH" for c in range(1, 13)]  # 96
     for i, img_path in enumerate(image_paths):
-        shutil.copy2(img_path, work / img_path.name)
+        shutil.copy2(img_path, work / IMAGES_SUBDIR / img_path.name)
         plate = f"p{i // 96 + 1:03d}"
         well = wells[i % 96]
         group = f"{plate}_{well}"
         rows.append(
             f"speedtest,20260928,{plate},{well},{group},m2x,"
-            f"{img_path.name},.,{WELLMASK.name},."
+            f"{img_path.name},{IMAGES_SUBDIR},{WELLMASK.name},."
         )
     (work / METADATA_CSV_NAME).write_text("\n".join(rows) + "\n")
 
