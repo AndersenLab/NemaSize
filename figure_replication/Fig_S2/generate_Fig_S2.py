@@ -120,10 +120,38 @@ def _shared_ylim(ns: pd.DataFrame) -> tuple[float, float]:
 		for v in series
 	]
 	pad = 0.05 * (max(vals) - min(vals))
-	return min(vals) - pad, max(vals) + pad
+	# Extra headroom above the data holds the significance bracket.
+	return min(vals) - pad, max(vals) + 3 * pad
 
 
-def create_species_boxplot(ns: pd.DataFrame, panel: str, measure: str, ylim: tuple[float, float]) -> Path:
+def _stars(p: float) -> str:
+	return "****" if p < 1e-4 else "***" if p < 1e-3 else "**" if p < 1e-2 else "*" if p < 0.05 else "ns"
+
+
+def _shared_bracket_y(ns: pd.DataFrame, ylim: tuple[float, float]) -> float:
+	"""Bracket height just above the highest error in either measure, so S2A and S2B match."""
+	top = max(
+		v
+		for measure in ("length", "width")
+		for series in _pct_error_by_species(ns, f"{measure}_diff_um", f"{measure}_um_human").values()
+		for v in series
+	)
+	return top + 0.04 * (ylim[1] - ylim[0])
+
+
+def _draw_significance(ax, data: dict[str, list[float]], ylim: tuple[float, float], top: float) -> float:
+	"""Bracket between the two species labelled with the signed-error rank-sum significance."""
+	a, b = SPECIES_ORDER
+	p = float(mannwhitneyu(data[a], data[b], alternative="two-sided").pvalue)
+	tick = 0.02 * (ylim[1] - ylim[0])
+	ax.plot([0, 0, 1, 1], [top - tick, top, top, top - tick], color="black", linewidth=1, clip_on=False)
+	ax.text(0.5, top, _stars(p), ha="center", va="bottom", fontsize=FONT_SIZE_PT, fontfamily="Arial")
+	return p
+
+
+def create_species_boxplot(
+	ns: pd.DataFrame, panel: str, measure: str, ylim: tuple[float, float], bracket_y: float,
+) -> Path:
 	"""One box plot of NemaSize percentage error of `measure` (length|width) per species."""
 	rows = SPECIES_ORDER
 	data = _pct_error_by_species(ns, f"{measure}_diff_um", f"{measure}_um_human")
@@ -133,6 +161,8 @@ def create_species_boxplot(ns: pd.DataFrame, panel: str, measure: str, ylim: tup
 	_draw_boxes(ax, rows, [(data, gf._PUBLICATION_METHOD_COLORS["NemaSize"], 0.0)], width=0.5)
 
 	ax.set_ylim(ylim)
+	p = _draw_significance(ax, data, ylim, bracket_y)
+	print(f"[Fig_S2{panel}] rank-sum (signed) p = {p:.3e} -> {_stars(p)}")
 	ax.set_xticks(range(len(rows)))
 	ax.set_xticklabels([_italic(r) for r in rows])
 	ax.set_ylabel(f"Percentage error of {measure} (%)", fontfamily="Arial", fontsize=FONT_SIZE_PT)
@@ -188,8 +218,9 @@ def main() -> None:
 	ns = load_common_worms()
 	print(ns["species"].value_counts().to_string())
 	ylim = _shared_ylim(ns)
-	create_species_boxplot(ns, "A", "length", ylim)
-	create_species_boxplot(ns, "B", "width", ylim)
+	bracket_y = _shared_bracket_y(ns, ylim)
+	create_species_boxplot(ns, "A", "length", ylim, bracket_y)
+	create_species_boxplot(ns, "B", "width", ylim, bracket_y)
 	write_ranksum_tests(ns)
 
 
