@@ -1,5 +1,5 @@
 # Lightweight dependencies for regenerating the paper figures in this
-# folder (Figs_4_and_S1/, Fig_5/). No YOLO / torch / rfdetr required.
+# folder (Figs_4_and_S1/, Fig_5/, Fig_6/). No YOLO / torch / rfdetr required.
 numpy>=1.21.0
 pandas>=1.4.0
 matplotlib>=3.5.0

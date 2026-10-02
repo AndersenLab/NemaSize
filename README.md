@@ -71,6 +71,7 @@ The repo is organized into four top-level modules:
 |---|---|
 | `Figs_4_and_S1/` | Data and scripts to regenerate Figs. 4 and S1 |
 | `Fig_5/` | Data and scripts to regenerate Fig. 5 |
+| `Fig_6/` | Data and script to regenerate Fig. 6 (NemaSize annotations on the public BBBC010 and BBBC011 datasets) |
 | `requirements.txt` | Lightweight dependencies required by both figure folders |
 
 See [Reproducing the paper figures](#reproducing-the-paper-figures) below for how to run these scripts.
@@ -126,6 +127,10 @@ cd figure_replication/Fig_5
 python generate_Fig_5A.py
 python generate_Fig_5D_and_E.py
 python calculate_ec_estimates.py
+
+# Fig. 6
+cd figure_replication/Fig_6
+python generate_Fig_6.py
 ```
 
 ### 3. Outputs
