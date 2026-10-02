@@ -1,0 +1,7 @@
+Per-box statistics for Fig_S2A.png
+Values are percentage error of worm length (%): (computer - human) / human * 100
+
+category                            method            n       mean     median        std        q25        q75
+--------------------------------------------------------------------------------------------------------------
+C_elegans                           NemaSize        393      4.039      2.795      5.193      0.607      6.159
+C_briggsae                          NemaSize        246      1.912      1.883      2.417      0.442      3.248

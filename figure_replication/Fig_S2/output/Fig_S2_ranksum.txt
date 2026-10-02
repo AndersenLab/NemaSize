@@ -1,0 +1,10 @@
+Wilcoxon rank-sum (Mann-Whitney U, two-sided) test of NemaSize error, C. elegans vs C. briggsae
+signed = (computer - human) / human * 100 (as plotted); absolute = |signed|
+Worms are treated as independent samples.
+
+measure  error      n_C_elegans n_C_briggsae median_C_elegans median_C_briggsae          U            p
+-------------------------------------------------------------------------------------------------------
+length   signed             393          246            2.795            1.883    58545.0    6.977e-06
+length   absolute           393          246            2.915            2.094    60023.0    2.671e-07
+width    signed             393          246            2.116            4.377    38903.0    3.249e-05
+width    absolute           393          246            4.564            5.082    44379.0    8.121e-02
