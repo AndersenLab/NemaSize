@@ -71,8 +71,9 @@ The repo is organized into four top-level modules:
 |---|---|
 | `Figs_4_and_S1/` | Data and scripts to regenerate Figs. 4 and S1 |
 | `Fig_5/` | Data and scripts to regenerate Fig. 5 |
-| `Fig_6/` | Data and script to regenerate Fig. 6 (NemaSize annotations on the public BBBC010 and BBBC011 datasets) |
-| `requirements.txt` | Lightweight dependencies required by both figure folders |
+| `Fig_6/` | Data and script to regenerate Fig. 6 |
+| `Fig_S2/` | Data and script to regenerate Fig. S2 |
+| `requirements.txt` | Lightweight dependencies required by all figure folders |
 
 See [Reproducing the paper figures](#reproducing-the-paper-figures) below for how to run these scripts.
 
@@ -131,6 +132,10 @@ python calculate_ec_estimates.py
 # Fig. 6
 cd figure_replication/Fig_6
 python generate_Fig_6.py
+
+# Fig. S2
+cd figure_replication/Fig_S2
+python generate_Fig_S2.py
 ```
 
 ### 3. Outputs
@@ -243,11 +248,10 @@ One row per detected worm.
 > incorrect — only `Filename`, `Worm_ID`, `Length_um`, and `Width_um`
 > are guaranteed.
 
-> **Units:** `Length_um` and `Width_um` are already in micrometers. The
-> pipeline applies a built-in pixel-to-µm scale based on the
-> `m<magnification>` tag in the filename. If your filenames don't
-> carry magnification, you'll need to apply the conversion yourself
-> from pixel coordinates (see the per-worm `.txt` files below).
+> **Units:** `Length_um` and `Width_um` use a fixed pixel-to-µm scale of
+> 3.2937 µm/px (`UM_PER_PX` in `source_code/skeletonize_worms.py`). The
+> `m<magnification>` tag in the filename is not used for scaling. For images
+> with a different pixel size, edit `UM_PER_PX` or rescale the output.
 
 ##### `contour_skeleton_txt/<image>_roi_<n>.txt`
 
@@ -255,19 +259,17 @@ One file per worm. Plain text with two sections:
 
 ```
 [CONTOUR]
-x y          ← outline polygon, normalized to [0, 1] of the ROI image
+x y          ← outline polygon, normalized to [0, 1] of the original image
 x y
 ...
 [SKELETON]
-x y          ← centerline polyline, normalized to [0, 1] of the ROI image
+x y          ← centerline polyline, normalized to [0, 1] of the original image
 x y
 ...
 ```
 
-To recover pixel coordinates, multiply by the ROI's width/height
-(available in `inference_rois/roi_catalog.json`). To recover original
-full-image coordinates, additionally apply the ROI's offset from the
-catalog.
+To recover pixel coordinates, multiply by the original image's width/height
+(available in `inference_rois/roi_catalog.json`).
 
 ##### `inference_rois/`
 
@@ -275,7 +277,7 @@ catalog.
   image. Useful for visual quality control of the detector and for re-running just
   the segmentation/skeleton stage.
 - **`roi_catalog.json`** — ROI bounding boxes and offsets, indexed by
-  source image. Required if you want to map results back to the
+  ROI name. Required if you want to map results back to the
   original full-resolution coordinates.
 
 ##### Visual quality control
