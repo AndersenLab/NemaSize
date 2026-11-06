@@ -41,12 +41,12 @@ NORM_FIG_WIDTH, NORM_FIG_HEIGHT = 3.5, 3.5    # normalised plot
 # ── Datasets to process ───────────────────────────────────────────────────────
 DATASETS = [
     {
-        "data": DATA_DIR / "20260615_length_reg_delta_nemasize.csv",
+        "data": DATA_DIR / "20260615_length_nemasize.csv",
         "out": OUTPUT_DIR / "Fig_6C.svg",
         "out_ratio": OUTPUT_DIR / "Fig_6D.svg",
     },
     {
-        "data": DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv",
+        "data": DATA_DIR / "20260522_length_cellprofiler.csv",
         "out": OUTPUT_DIR / "Fig_6A.svg",
         "out_ratio": OUTPUT_DIR / "Fig_6B.svg",
     },

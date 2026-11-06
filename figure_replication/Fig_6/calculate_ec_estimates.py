@@ -37,11 +37,11 @@ OUTPUT_DIR = SCRIPT_DIR / "output" / "ec_estimates"
 DATASETS = [
     {
         "name": "NemaSize",
-        "data": DATA_DIR / "20260615_length_reg_delta_nemasize.csv",
+        "data": DATA_DIR / "20260615_length_nemasize.csv",
     },
     {
         "name": "CellProfiler",
-        "data": DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv",
+        "data": DATA_DIR / "20260522_length_cellprofiler.csv",
     },
 ]
 

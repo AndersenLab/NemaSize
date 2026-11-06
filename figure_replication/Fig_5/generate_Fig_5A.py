@@ -16,8 +16,8 @@ DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR / "output"
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-NEMASIZE_PATH = DATA_DIR / "20260615_length_reg_delta_nemasize.csv"
-CELLPROFILER_PATH = DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv"
+NEMASIZE_PATH = DATA_DIR / "20260615_length_nemasize.csv"
+CELLPROFILER_PATH = DATA_DIR / "20260522_length_cellprofiler.csv"
 OUT_PATH_SVG = OUTPUT_DIR / "Fig_5A.svg"
 OUT_PATH_PNG = OUTPUT_DIR / "Fig_5A.png"
 
