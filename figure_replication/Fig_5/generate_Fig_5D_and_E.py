@@ -8,6 +8,10 @@ Only the normalized plot is produced (the raw/unnormalized plot is disabled).
 
 X-axis: concentration_um (log scale)
 Y-axis: median_wormlength_um_reg_delta, normalized and converted to nM (x-axis)
+
+Additionally produces Fig_5D_ratio / Fig_5E_ratio, where the y-axis is
+median_wormlength_um / (mean median_wormlength_um of that strain's 0 µM control
+wells, the same raw control length shown in Fig 5A).
 """
 
 import pandas as pd
@@ -35,18 +39,34 @@ DATASETS = [
     {
         "data": DATA_DIR / "20260615_length_reg_delta_nemasize.csv",
         "out": OUTPUT_DIR / "Fig_5E.svg",
+        "out_ratio": OUTPUT_DIR / "Fig_5E_ratio.svg",
     },
     {
         "data": DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv",
         "out": OUTPUT_DIR / "Fig_5D.svg",
+        "out_ratio": OUTPUT_DIR / "Fig_5D_ratio.svg",
     },
 ]
+
+# Metric definitions: column to aggregate, y-axis label, y major tick step
+DELTA = {"col": "median_wormlength_um_reg_delta",
+         "ylabel": "Δ animal length (µm)", "tick": 100}
+RATIO = {"col": "median_wormlength_um_ratio",
+         "ylabel": "Fractional animal length", "tick": 0.2}
 
 
 def aggregate(data_path: Path):
     """Load CSV and return per-strain × concentration mean/SD."""
     df = pd.read_csv(data_path)
     df["strain"] = df["strain"].replace("PB420", "CGC2")
+    # Ratio to the strain's mean raw length in the 0 µM (control) wells, as in Fig 5A
+    ctrl_len = (
+        df.loc[df["concentration_um"] == 0]
+        .groupby("strain")["median_wormlength_um"].mean()
+    )
+    df["median_wormlength_um_ratio"] = (
+        df["median_wormlength_um"] / df["strain"].map(ctrl_len)
+    )
     agg = (
         df.groupby(["strain", "concentration_um"])["median_wormlength_um_reg"]
         .agg(mean="mean", sd=lambda x: x.std(), n="count")
@@ -59,11 +79,11 @@ def aggregate(data_path: Path):
     return df, agg, nonzero_concs, pseudo_zero
 
 
-def compute_norm(df):
-    """Aggregate pre-computed delta column (nonzero doses only); convert µM → nM."""
+def compute_norm(df, col):
+    """Aggregate a normalised column (nonzero doses only); convert µM → nM."""
     agg_norm = (
         df.loc[df["concentration_um"] > 0]
-        .groupby(["strain", "concentration_um"])["median_wormlength_um_reg_delta"]
+        .groupby(["strain", "concentration_um"])[col]
         .agg(mean_norm="mean", sd=lambda x: x.std())
         .reset_index()
     )
@@ -71,7 +91,7 @@ def compute_norm(df):
     return agg_norm
 
 
-def plot_dose_response(agg_norm, out_path: Path, norm_ylim) -> None:
+def plot_dose_response(agg_norm, out_path: Path, norm_ylim, ylabel, tick_step) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     strains = sorted(agg_norm["strain"].unique())
@@ -94,9 +114,9 @@ def plot_dose_response(agg_norm, out_path: Path, norm_ylim) -> None:
 
     ax2.set_xscale("log")
     ax2.set_ylim(norm_ylim)
-    ax2.yaxis.set_major_locator(ticker.MultipleLocator(100))
+    ax2.yaxis.set_major_locator(ticker.MultipleLocator(tick_step))
     ax2.set_xlabel("Ivermectin concentration (nM)", fontsize=NORM_LABEL_SIZE)
-    ax2.set_ylabel("Normalized animal length (µm)", fontsize=NORM_LABEL_SIZE)
+    ax2.set_ylabel(ylabel, fontsize=NORM_LABEL_SIZE)
     ax2.legend(fontsize=NORM_LEGEND_SIZE, frameon=False, loc="lower left")
     ax2.spines["top"].set_visible(False)
     ax2.spines["right"].set_visible(False)
@@ -111,20 +131,23 @@ def plot_dose_response(agg_norm, out_path: Path, norm_ylim) -> None:
 
 
 # ── Run for all datasets ──────────────────────────────────────────────────────
-# Pass 1: aggregate all data and compute shared normalised y limits
 all_data = [aggregate(ds["data"]) for ds in DATASETS]
-all_norms = [compute_norm(df) for df, *_ in all_data]
 
-combined = pd.concat(all_norms)
-y_lo = (combined["mean_norm"] - combined["sd"]).min()
-y_hi = (combined["mean_norm"] + combined["sd"]).max()
-margin = (y_hi - y_lo) * 0.05
-shared_norm_ylim = (y_lo - margin, y_hi + margin)
-
-# Pass 2: plot each dataset with the shared y range
-for ds, (df, agg, _nonzero_concs, _pseudo_zero), agg_norm in zip(DATASETS, all_data, all_norms):
+for ds, (df, agg, _nonzero_concs, _pseudo_zero) in zip(DATASETS, all_data):
     print(f"\nProcessing: {ds['data'].name}")
     print("Sample sizes (n wells per strain × concentration):")
     print(agg.pivot(index="strain", columns="concentration_um", values="n").to_string())
     print()
-    plot_dose_response(agg_norm, ds["out"], norm_ylim=shared_norm_ylim)
+
+# Delta (Fig_5D/E) and ratio-to-control (Fig_5D/E_ratio); each metric shares y limits across datasets
+for metric, out_key in ((DELTA, "out"), (RATIO, "out_ratio")):
+    all_norms = [compute_norm(df, metric["col"]) for df, *_ in all_data]
+    combined = pd.concat(all_norms)
+    y_lo = (combined["mean_norm"] - combined["sd"]).min()
+    y_hi = (combined["mean_norm"] + combined["sd"]).max()
+    margin = (y_hi - y_lo) * 0.05
+    ylim = (y_lo - margin, y_hi + margin)
+    if metric is RATIO:
+        ylim = (0, ylim[1])
+    for ds, agg_norm in zip(DATASETS, all_norms):
+        plot_dose_response(agg_norm, ds[out_key], ylim, metric["ylabel"], metric["tick"])
