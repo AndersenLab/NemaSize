@@ -105,8 +105,9 @@ See [Reproducing the paper figures](#reproducing-the-paper-figures) below for ho
 
 ## Reproducing the paper figures
 
-Each figure has its own self-contained folder under `figure_replication/`
-with bundled input data and an `output/` folder.
+Each figure has a self-contained folder under `figure_replication/` that
+includes analysis scripts, a `data/` folder containing the input data, and an
+`output/` folder containing the generated plots and tabulated results.
 
 ### 1. Install required dependencies
 
