@@ -73,7 +73,7 @@ FITS = [
         "tag": "reg",
         "trait": "median_wormlength_um_reg",
         "c_fixed": C_FIXED_UM,
-        "suffix": "",
+        "suffix": "_delta",
     },
     {
         "tag": "ratio",
