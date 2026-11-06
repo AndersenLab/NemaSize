@@ -9,7 +9,7 @@ Model: four-parameter log-logistic (drc::LL.4)
 Fit structure (mirrors safe_LL4_strain):
     pmodels = list(~strain-1, ~1, ~1, ~strain-1),
     fct     = LL.4(fixed = c(NA, -600, NA, NA))
-  -> c fixed at -600
+  -> c fixed at -600 (length scale) or L1/L4 = 1 - 600/L4 (ratio scale)
   -> d shared across strains within a dataset
   -> b and e fit per strain (joint NLS over all strains)
 
@@ -38,22 +38,67 @@ DATASETS = [
     {
         "name": "NemaSize",
         "data": DATA_DIR / "20260615_length_reg_delta_nemasize.csv",
-        "out": OUTPUT_DIR / "ec_estimates_NemaSize.csv",
     },
     {
         "name": "CellProfiler",
         "data": DATA_DIR / "20260522_Cbriggsae_IVM_DRC2_regressed_delta_HTLDA_cellprofiler.csv",
-        "out": OUTPUT_DIR / "ec_estimates_CellProfiler.csv",
     },
 ]
 
-# Combined side-by-side comparison output (slope + EC + SEs, both methods)
-COMPARISON_OUT = OUTPUT_DIR / "ec_estimates_comparison.csv"
-
-TRAIT = "median_wormlength_um_reg"
-C_FIXED = -600.0        # LL.4(fixed = c(NA, -600, NA, NA))
 EC_LEVELS = (0.10, 0.50, 0.90)
 Z95 = norm.ppf(0.975)
+
+RATIO_TRAIT = "median_wormlength_um_ratio"
+
+# Theoretical maximum length loss (L1 - L4 of C. briggsae), in µm. This is the
+# lower asymptote c of the length-scale fit.
+C_FIXED_UM = -600.0
+
+
+def ratio_c_fixed() -> float:
+    """
+    Lower asymptote on the ratio scale: L1 / L4 = 1 - 600 / L4, where L4 is the
+    mean NemaSize median_wormlength_um across all 0 µM (control) wells.
+    """
+    df = pd.read_csv(DATASETS[0]["data"])
+    l4 = df.loc[df["concentration_um"] == 0, "median_wormlength_um"].mean()
+    return 1.0 + C_FIXED_UM / l4
+
+
+# Fit configurations. "ratio" fits the raw length divided by each strain's mean
+# 0 µM (control) length, identical to the ratio plots in generate_Fig_5D_and_E.py.
+# c is the fixed lower asymptote (LL.4(fixed = c(NA, c, NA, NA))).
+FITS = [
+    {
+        "tag": "reg",
+        "trait": "median_wormlength_um_reg",
+        "c_fixed": C_FIXED_UM,
+        "suffix": "",
+    },
+    {
+        "tag": "ratio",
+        "trait": RATIO_TRAIT,
+        "c_fixed": ratio_c_fixed(),
+        "suffix": "_ratio",
+    },
+]
+
+
+def add_ratio_column(df: pd.DataFrame) -> pd.DataFrame:
+    ctrl_len = (
+        df.loc[df["concentration_um"] == 0]
+        .groupby("strain")["median_wormlength_um"].mean()
+    )
+    df[RATIO_TRAIT] = df["median_wormlength_um"] / df["strain"].map(ctrl_len)
+    return df
+
+
+def out_path(dataset_name: str, suffix: str) -> Path:
+    return OUTPUT_DIR / f"ec_estimates_{dataset_name}{suffix}.csv"
+
+
+def comparison_path(suffix: str) -> Path:
+    return OUTPUT_DIR / f"ec_estimates_comparison{suffix}.csv"
 
 
 # ── LL.4 model ────────────────────────────────────────────────────────────────
@@ -71,7 +116,7 @@ def ll4(x, b, c, d, e):
     return out
 
 
-def make_joint_model(strain_idx):
+def make_joint_model(strain_idx, c_fixed):
     """
     Build the model callable that curve_fit will optimize.
     Parameter layout: [d, b_1, e_1, b_2, e_2, ..., b_K, e_K]
@@ -82,22 +127,22 @@ def make_joint_model(strain_idx):
         e_arr = np.asarray(params[2::2])
         b = b_arr[strain_idx]
         e = e_arr[strain_idx]
-        return ll4(x, b, C_FIXED, d, e)
+        return ll4(x, b, c_fixed, d, e)
     return model
 
 
 # ── Fit one dataset ───────────────────────────────────────────────────────────
-def fit_dataset(df: pd.DataFrame):
+def fit_dataset(df: pd.DataFrame, trait: str, c_fixed: float):
     """Joint LL.4 fit across all strains in `df`. Returns (strains, popt, pcov)."""
-    sub = df[["strain", "concentration_um", TRAIT]].dropna().copy()
-    sub = sub[np.isfinite(sub["concentration_um"]) & np.isfinite(sub[TRAIT])]
+    sub = df[["strain", "concentration_um", trait]].dropna().copy()
+    sub = sub[np.isfinite(sub["concentration_um"]) & np.isfinite(sub[trait])]
 
     strains = sorted(sub["strain"].unique())
     strain_to_idx = {s: i for i, s in enumerate(strains)}
     K = len(strains)
 
     X = sub["concentration_um"].to_numpy(dtype=float)
-    Y = sub[TRAIT].to_numpy(dtype=float)
+    Y = sub[trait].to_numpy(dtype=float)
     sidx = sub["strain"].map(strain_to_idx).to_numpy(dtype=int)
 
     # Initial guesses
@@ -113,7 +158,7 @@ def fit_dataset(df: pd.DataFrame):
     lower = [-np.inf] + [-np.inf, 1e-12] * K
     upper = [ np.inf] + [ np.inf,  np.inf] * K
 
-    model = make_joint_model(sidx)
+    model = make_joint_model(sidx, c_fixed)
     popt, pcov = curve_fit(
         model, X, Y, p0=p0, bounds=(lower, upper), maxfev=50000
     )
@@ -132,7 +177,7 @@ def ec_with_delta_se(p, b, e, var_b, var_e, cov_be):
     return float(ec), se
 
 
-def build_results(dataset_name, strains, popt, pcov) -> pd.DataFrame:
+def build_results(dataset_name, strains, popt, pcov, c_fixed) -> pd.DataFrame:
     d = float(popt[0])
     d_se = float(np.sqrt(pcov[0, 0]))
 
@@ -150,7 +195,7 @@ def build_results(dataset_name, strains, popt, pcov) -> pd.DataFrame:
             "strain": strain,
             "b": b,
             "b_se": float(np.sqrt(var_b)),
-            "c_fixed": C_FIXED,
+            "c_fixed": c_fixed,
             "d_shared": d,
             "d_se": d_se,
             "e_um": e,
@@ -219,30 +264,35 @@ def build_comparison(per_dataset_results: dict) -> pd.DataFrame:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 def main():
-    per_dataset_results: dict[str, pd.DataFrame] = {}
-    for ds in DATASETS:
-        print(f"\n=== {ds['name']}  ({ds['data'].name}) ===")
-        df = pd.read_csv(ds["data"])
-        df["strain"] = df["strain"].replace("PB420", "CGC2")   # match plot script
+    for fit in FITS:
+        print(f"\n######## Fit: {fit['tag']}  (trait={fit['trait']}, c={fit['c_fixed']}) ########")
+        per_dataset_results: dict[str, pd.DataFrame] = {}
+        for ds in DATASETS:
+            print(f"\n=== {ds['name']}  ({ds['data'].name}) ===")
+            df = pd.read_csv(ds["data"])
+            df["strain"] = df["strain"].replace("PB420", "CGC2")   # match plot script
+            df = add_ratio_column(df)
 
-        strains, popt, pcov = fit_dataset(df)
-        result = build_results(ds["name"], strains, popt, pcov)
+            strains, popt, pcov = fit_dataset(df, fit["trait"], fit["c_fixed"])
+            result = build_results(ds["name"], strains, popt, pcov, fit["c_fixed"])
 
-        ds["out"].parent.mkdir(parents=True, exist_ok=True)
-        result.to_csv(ds["out"], index=False)
-        per_dataset_results[ds["name"]] = result
+            path = out_path(ds["name"], fit["suffix"])
+            path.parent.mkdir(parents=True, exist_ok=True)
+            result.to_csv(path, index=False)
+            per_dataset_results[ds["name"]] = result
 
-        with pd.option_context("display.width", 200, "display.max_columns", None):
-            print(result.round(4).to_string(index=False))
-        print(f"Saved: {ds['out']}")
+            with pd.option_context("display.width", 200, "display.max_columns", None):
+                print(result.round(4).to_string(index=False))
+            print(f"Saved: {path}")
 
-    comparison = build_comparison(per_dataset_results)
-    COMPARISON_OUT.parent.mkdir(parents=True, exist_ok=True)
-    comparison.to_csv(COMPARISON_OUT, index=False, encoding="utf-8-sig")
-    print("\n=== NemaSize vs CellProfiler comparison ===")
-    with pd.option_context("display.width", 220, "display.max_columns", None):
-        print(comparison.round(4).to_string(index=False))
-    print(f"Saved: {COMPARISON_OUT}")
+        comparison = build_comparison(per_dataset_results)
+        comp_path = comparison_path(fit["suffix"])
+        comp_path.parent.mkdir(parents=True, exist_ok=True)
+        comparison.to_csv(comp_path, index=False, encoding="utf-8-sig")
+        print("\n=== NemaSize vs CellProfiler comparison ===")
+        with pd.option_context("display.width", 220, "display.max_columns", None):
+            print(comparison.round(4).to_string(index=False))
+        print(f"Saved: {comp_path}")
 
 
 if __name__ == "__main__":
