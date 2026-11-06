@@ -1,6 +1,6 @@
 """
 EC10 / EC50 / EC90 + slope (b) estimation for dose-response datasets used by
-generate_Fig_5D_and_E.py. Python port of ec_estimates.R, which itself wraps
+generate_Fig_6.py. Python port of ec_estimates.R, which itself wraps
 fit_DRC_models() + safe_EC() from master_anthDRmanuscript_analysis_script.R.
 
 Model: four-parameter log-logistic (drc::LL.4)
@@ -29,10 +29,10 @@ from scipy.optimize import curve_fit
 from scipy.stats import norm
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATA_DIR = SCRIPT_DIR / "data"
+DATA_DIR = SCRIPT_DIR.parent / "Fig_5" / "data"
 OUTPUT_DIR = SCRIPT_DIR / "output" / "ec_estimates"
 
-# Same two CSVs as generate_Fig_5D_and_E.py. Both datasets analyse the SAME
+# Same two CSVs as generate_Fig_6.py. Both datasets analyse the SAME
 # images; they differ only in the processing tool (NemaSize vs CellProfiler).
 DATASETS = [
     {
@@ -66,7 +66,7 @@ def ratio_c_fixed() -> float:
 
 
 # Fit configurations. "ratio" fits the raw length divided by each strain's mean
-# 0 µM (control) length, identical to the ratio plots in generate_Fig_5D_and_E.py.
+# 0 µM (control) length, identical to the ratio plots in generate_Fig_6.py.
 # c is the fixed lower asymptote (LL.4(fixed = c(NA, c, NA, NA))).
 FITS = [
     {

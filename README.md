@@ -70,8 +70,9 @@ The repo is organized into four top-level modules:
 | File / folder | Purpose |
 |---|---|
 | `Figs_4_and_S1/` | Data and scripts to regenerate Figs. 4 and S1 |
-| `Fig_5/` | Data and scripts to regenerate Fig. 5 |
-| `Fig_6/` | Data and script to regenerate Fig. 6 |
+| `Fig_5/` | Data and script to regenerate Fig. 5A (also holds the dose-response data shared with Fig. 6) |
+| `Fig_6/` | Scripts to regenerate Fig. 6 (dose-response plots and EC estimates; reads data from `Fig_5/data/`) |
+| `Fig_7/` | Data and script to regenerate Fig. 7 |
 | `Fig_S2/` | Data and script to regenerate Fig. S2 |
 | `requirements.txt` | Lightweight dependencies required by all figure folders |
 
@@ -126,12 +127,15 @@ python generate_figures.py
 # Fig. 5
 cd figure_replication/Fig_5
 python generate_Fig_5A.py
-python generate_Fig_5D_and_E.py
-python calculate_ec_estimates.py
 
-# Fig. 6
+# Fig. 6 (uses the CSVs in figure_replication/Fig_5/data)
 cd figure_replication/Fig_6
 python generate_Fig_6.py
+python calculate_ec_estimates.py
+
+# Fig. 7
+cd figure_replication/Fig_7
+python generate_Fig_7.py
 
 # Fig. S2
 cd figure_replication/Fig_S2
