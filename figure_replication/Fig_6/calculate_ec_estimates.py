@@ -29,7 +29,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import norm
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATA_DIR = SCRIPT_DIR.parent / "Fig_5" / "data"
+DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR / "output" / "ec_estimates"
 
 # Same two CSVs as generate_Fig_6.py. Both datasets analyse the SAME

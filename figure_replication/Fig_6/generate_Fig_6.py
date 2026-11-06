@@ -16,8 +16,6 @@ converted to nM (x-axis).
 Ratio plots (B, D): y-axis is median_wormlength_um / (mean median_wormlength_um
 of that strain's 0 µM control wells, the same raw control length shown in
 Fig 5A).
-
-The input CSVs are shared with Fig 5A and live in ../Fig_5/data.
 """
 
 import pandas as pd
@@ -29,7 +27,7 @@ from pathlib import Path
 plt.rcParams["font.family"] = "Arial"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATA_DIR = SCRIPT_DIR.parent / "Fig_5" / "data"
+DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR / "output"
 
 # ── Normalised plot font sizes ─────────────────────────────────────────────────
