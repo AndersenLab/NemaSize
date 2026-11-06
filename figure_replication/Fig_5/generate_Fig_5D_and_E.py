@@ -50,9 +50,9 @@ DATASETS = [
 
 # Metric definitions: column to aggregate, y-axis label, y major tick step
 DELTA = {"col": "median_wormlength_um_reg_delta",
-         "ylabel": "Δ animal length (µm)", "tick": 100}
+         "ylabel": "CAL (µm)", "tick": 100}
 RATIO = {"col": "median_wormlength_um_ratio",
-         "ylabel": "Fractional animal length", "tick": 0.2}
+         "ylabel": "FAL", "tick": 0.2}
 
 
 def aggregate(data_path: Path):
