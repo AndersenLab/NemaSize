@@ -43,6 +43,31 @@ images. In ``--txt-path`` single-file mode only, ``--image-path`` can be used
 instead to point directly at one raw image file. In batch mode, worms that
 fail (e.g. a fragmented/multi-contour mask) are skipped with a warning rather
 than aborting the whole run.
+
+Two-channel mode (e.g. brightfield + GFP)
+------------------------------------------
+Segment geometry (contour + skeleton) always comes from ``--image-path`` /
+``--image-dir`` (the channel the pipeline was run on, e.g. brightfield). To
+instead *measure* intensity from a second, pixel-aligned channel (e.g. GFP),
+add ``--intensity-image-path`` (single-file mode) or ``--intensity-image-dir``
+(batch mode):
+
+    python plot_intensity_profile.py \
+        --txt-path              path/to/contour_skeleton_txt/IMG_roi_0.txt \
+        --image-path             path/to/BF/IMG.TIF \
+        --intensity-image-path   path/to/GFP/IMG_w1.TIF \
+        --mask-channel-label     BF \
+        --intensity-channel-label GFP \
+        --output-dir             path/to/intensity_profile
+
+For batch mode, if the two channels' filenames differ only by a fixed token
+(e.g. brightfield ``..._w2.TIF`` vs GFP ``..._w1.TIF``), pass
+``--intensity-image-dir`` together with ``--mask-channel-token "_w2"
+--intensity-channel-token "_w1"`` and the GFP filename is derived
+automatically for every worm. The two images must have identical pixel
+dimensions (same camera FOV/resolution); a mismatch raises an error. Sub-pixel
+misregistration between channels cannot be detected automatically and should
+be verified manually beforehand.
 """
 
 import argparse
@@ -111,6 +136,21 @@ def assign_segments(mask: np.ndarray, anchors: np.ndarray) -> np.ndarray:
     return label_img
 
 
+def _prep_display(img: np.ndarray) -> np.ndarray:
+    """Min/max-stretch a raw image to 8-bit BGR for display only (never used
+    for the actual intensity measurement) — the same normalisation as
+    ``visualize_contour_skeleton.load_16bit_tif_as_8bit``: linearly map
+    ``[img.min(), img.max()]`` to ``[0, 255]``.
+    """
+    lo, hi = float(img.min()), float(img.max())
+    if hi > lo:
+        disp = (img.astype(np.float32) - lo) / (hi - lo) * 255.0
+    else:
+        disp = np.zeros_like(img, dtype=np.float32)
+    disp = disp.clip(0, 255).astype(np.uint8)
+    return cv2.cvtColor(disp, cv2.COLOR_GRAY2BGR)
+
+
 def compute_intensity_profile(
     raw_img: np.ndarray, label_img: np.ndarray, n_segments: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -164,27 +204,28 @@ def render_segment_overlay(
     anchors: np.ndarray,
     n_segments: int,
     out_path: Path,
+    intensity_img: np.ndarray | None = None,
+    mask_channel_label: str = "Raw",
+    intensity_channel_label: str = "Intensity source",
 ) -> None:
-    """Debug image with three side-by-side panels:
+    """Debug image with three (or four) side-by-side panels:
 
-    1. ``Raw`` — the raw grayscale crop.
+    1. ``<mask_channel_label>`` (default ``"Raw"``) — the raw grayscale crop
+       of the image used for segmentation (e.g. brightfield).
     2. ``Segmented`` — worm body colour-coded by segment index (head=segment
        0 -> tail=segment n_segments-1, "turbo" colormap: dark blue -> green
-       -> yellow -> red), with a thin 1-px centerline traced through the
-       skeleton anchors, a hollow ring at the head and a filled dot at the
-       tail, and a colour bar below showing the segment-index -> colour
-       mapping.
+       -> yellow -> red), drawn over the segmentation-source image, with a
+       thin 1-px centerline traced through the skeleton anchors, a hollow
+       ring at the head and a filled dot at the tail, and a colour bar below
+       showing the segment-index -> colour mapping.
     3. ``Segment divisions`` — the worm outline plus every internal
        segment-to-segment boundary drawn as a thin black line on white,
        i.e. the 100 body-coordinate bins as 100 "slices".
+    4. ``<intensity_channel_label>`` (default ``"Intensity source"``) —
+       only added when ``intensity_img`` is given (i.e. a second channel,
+       such as GFP, supplies the actual pixel values being measured).
     """
-    lo, hi = float(raw_img.min()), float(raw_img.max())
-    if hi > lo:
-        disp = ((raw_img.astype(np.float32) - lo) / (hi - lo) * 255.0)
-    else:
-        disp = np.zeros_like(raw_img, dtype=np.float32)
-    disp = disp.clip(0, 255).astype(np.uint8)
-    disp_bgr = cv2.cvtColor(disp, cv2.COLOR_GRAY2BGR)
+    disp_bgr = _prep_display(raw_img)
 
     cmap = plt.get_cmap("turbo")
     colors_rgb = (np.array([cmap(i / max(n_segments - 1, 1))[:3] for i in range(n_segments)]) * 255)
@@ -220,7 +261,7 @@ def render_segment_overlay(
     divisions = np.full((h, w, 3), 255, dtype=np.uint8)
     divisions[boundary] = (0, 0, 0)
 
-    # ── Compose "Raw" | "Segmented" | "Segment divisions" side by side ─────
+    # ── Compose panels side by side ─────────────────────────────────────────
     divider_w = 2
     caption_h = 18
     colorbar_h = 10
@@ -228,7 +269,9 @@ def render_segment_overlay(
     tick_h = 14
     footer_h = colorbar_pad + colorbar_h + tick_h
 
-    panels = [("Raw", disp_bgr), ("Segmented", segmented), ("Segment divisions", divisions)]
+    panels = [(mask_channel_label, disp_bgr), ("Segmented", segmented), ("Segment divisions", divisions)]
+    if intensity_img is not None:
+        panels.append((intensity_channel_label, _prep_display(intensity_img)))
     total_w = w * len(panels) + divider_w * (len(panels) - 1)
     canvas = np.full((caption_h + h + footer_h, total_w, 3), 255, dtype=np.uint8)
 
@@ -278,10 +321,22 @@ def render_segment_overlay(
 # I/O helpers
 # ---------------------------------------------------------------------------
 
-def resolve_raw_image_path(txt_path: Path, image_dir: Path) -> Path:
-    """Find the raw image matching a ``..._roi_<id>.txt`` file's source image stem."""
+def resolve_raw_image_path(
+    txt_path: Path, image_dir: Path, channel_sub: tuple[str, str] | None = None,
+) -> Path:
+    """Find the raw image matching a ``..._roi_<id>.txt`` file's source image stem.
+
+    ``channel_sub`` is an optional ``(old, new)`` substring pair applied to the
+    resolved stem before searching ``image_dir`` — used to derive a second
+    channel's filename (e.g. a GFP image named with ``_w1`` where the
+    brightfield/mask image used ``_w2``) when the two channels live in
+    different folders but otherwise share a naming convention.
+    """
     m = re.match(r"^(.+)_roi_\d+$", txt_path.stem)
     image_stem = m.group(1) if m else txt_path.stem
+    if channel_sub is not None:
+        old, new = channel_sub
+        image_stem = image_stem.replace(old, new)
     for ext in RAW_IMAGE_EXTENSIONS:
         candidate = image_dir / (image_stem + ext)
         if candidate.exists():
@@ -312,8 +367,20 @@ def compute_and_plot_intensity_profile(
     output_dir: Path,
     n_segments: int = 100,
     pad_px: int = 20,
+    intensity_image_path: Path | None = None,
+    mask_channel_label: str = "Raw",
+    intensity_channel_label: str = "Intensity source",
 ) -> dict:
     """Run the full intensity-profiling pipeline for one worm and save outputs.
+
+    ``image_path`` supplies the contour/skeleton geometry's source image
+    (e.g. brightfield) and is always shown in the "segmented"/division panels.
+    ``intensity_image_path`` is optional: when given, pixel intensities are
+    sampled from that *second* channel (e.g. GFP) instead of ``image_path``,
+    under the assumption that the two images are pixel-for-pixel aligned
+    (same camera FOV/resolution, no shift between channel acquisitions) — a
+    shape mismatch raises an error, but sub-pixel misregistration cannot be
+    detected automatically and should be checked manually beforehand.
 
     Returns a dict with ``mean_intensity``, ``std_intensity``, ``pixel_counts``
     (each ``(n_segments,)`` arrays) for programmatic use/testing.
@@ -326,6 +393,18 @@ def compute_and_plot_intensity_profile(
 
     raw_img = load_raw_image(image_path)
     h, w = raw_img.shape[:2]
+
+    if intensity_image_path is not None:
+        intensity_img_full = load_raw_image(intensity_image_path)
+        if intensity_img_full.shape[:2] != (h, w):
+            raise ValueError(
+                f"[{txt_path.name}] Mask image {image_path.name} is "
+                f"{w}x{h} but intensity image {intensity_image_path.name} is "
+                f"{intensity_img_full.shape[1]}x{intensity_img_full.shape[0]}. "
+                "The two channels must be pixel-aligned (same FOV/resolution)."
+            )
+    else:
+        intensity_img_full = raw_img
 
     # Denormalise (fractions of full original image) -> full-image pixel coords.
     contours_px = [c * np.array([w, h]) for c in contours_norm]
@@ -350,6 +429,7 @@ def compute_and_plot_intensity_profile(
     y1 = min(h, int(np.ceil(all_pts[:, 1].max())) + pad_px)
 
     raw_crop = raw_img[y0:y1, x0:x1]
+    intensity_crop = intensity_img_full[y0:y1, x0:x1]
     contours_crop = [c - np.array([x0, y0]) for c in contours_px]
     skeleton_crop = skeleton_px - np.array([x0, y0])
 
@@ -358,7 +438,7 @@ def compute_and_plot_intensity_profile(
     label_img = assign_segments(mask, anchors)
 
     mean_intensity, std_intensity, pixel_counts = compute_intensity_profile(
-        raw_crop, label_img, n_segments,
+        intensity_crop, label_img, n_segments,
     )
     n_empty = int(np.sum(pixel_counts == 0))
     if n_empty > 0:
@@ -373,11 +453,16 @@ def compute_and_plot_intensity_profile(
     plot_path = output_dir / f"{stem}_intensity_profile.png"
     overlay_path = output_dir / f"{stem}_segments_overlay.png"
 
-    plot_intensity_profile(
-        mean_intensity, std_intensity, plot_path,
-        title=f"Body intensity profile — {stem} (n={n_segments} segments)",
+    title = f"Body intensity profile — {stem} (n={n_segments} segments)"
+    if intensity_image_path is not None:
+        title += f" [{intensity_channel_label}]"
+    plot_intensity_profile(mean_intensity, std_intensity, plot_path, title=title)
+    render_segment_overlay(
+        raw_crop, label_img, anchors, n_segments, overlay_path,
+        intensity_img=(intensity_crop if intensity_image_path is not None else None),
+        mask_channel_label=mask_channel_label,
+        intensity_channel_label=intensity_channel_label,
     )
-    render_segment_overlay(raw_crop, label_img, anchors, n_segments, overlay_path)
 
     return {
         "mean_intensity": mean_intensity,
@@ -401,12 +486,40 @@ def main() -> None:
                         help="Directory of *.txt contour/skeleton files to "
                              "process in batch (e.g. contour_skeleton_txt/).")
     parser.add_argument("--image-path", type=str, default=None,
-                        help="Path to the raw source image (--txt-path mode only). "
-                             "If omitted, --image-dir is used to auto-resolve it.")
+                        help="Path to the raw segmentation-source image (e.g. "
+                             "brightfield; --txt-path mode only). If omitted, "
+                             "--image-dir is used to auto-resolve it.")
     parser.add_argument("--image-dir", type=str, default=None,
-                        help="Directory containing the raw source image(s) "
-                             "(auto-resolved per txt file from its image stem). "
-                             "Required for --txt-dir.")
+                        help="Directory containing the raw segmentation-source "
+                             "image(s) (auto-resolved per txt file from its "
+                             "image stem). Required for --txt-dir.")
+    parser.add_argument("--intensity-image-path", type=str, default=None,
+                        help="Path to a second-channel raw image (e.g. GFP) to "
+                             "sample pixel intensity from (--txt-path mode only). "
+                             "The image must be pixel-aligned with --image-path "
+                             "(same FOV/resolution). If omitted, intensity is "
+                             "sampled from --image-path/--image-dir instead.")
+    parser.add_argument("--intensity-image-dir", type=str, default=None,
+                        help="Directory containing the second-channel raw "
+                             "image(s), auto-resolved per txt file the same way "
+                             "as --image-dir. Combine with --mask-channel-token / "
+                             "--intensity-channel-token if the channel filenames "
+                             "differ by a fixed token (e.g. '_w2' vs '_w1').")
+    parser.add_argument("--mask-channel-token", type=str, default=None,
+                        help="Substring in the segmentation-source image's "
+                             "filename stem to replace when deriving the "
+                             "intensity-channel filename (used with "
+                             "--intensity-image-dir), e.g. '_w2'.")
+    parser.add_argument("--intensity-channel-token", type=str, default=None,
+                        help="Replacement substring for --mask-channel-token "
+                             "(used with --intensity-image-dir), e.g. '_w1'.")
+    parser.add_argument("--mask-channel-label", type=str, default="Raw",
+                        help='Caption for the segmentation-source panel in the '
+                             'overlay image (default "Raw").')
+    parser.add_argument("--intensity-channel-label", type=str, default="Intensity source",
+                        help='Caption for the intensity-source panel, shown '
+                             'only when a second channel is used (default '
+                             '"Intensity source").')
     parser.add_argument("--output-dir", type=str, default=None,
                         help="Directory to write the plot and overlay image(s) to. "
                              "Default: <txt file(s) parent>/intensity_profile")
@@ -427,6 +540,16 @@ def main() -> None:
 
     if args.txt_dir and not args.image_dir:
         parser.error("--image-dir is required when using --txt-dir.")
+    if args.intensity_image_path and args.txt_dir:
+        parser.error("--intensity-image-path only applies to --txt-path mode; "
+                      "use --intensity-image-dir for --txt-dir batches.")
+
+    channel_sub = None
+    if args.mask_channel_token or args.intensity_channel_token:
+        if not (args.mask_channel_token and args.intensity_channel_token):
+            parser.error("--mask-channel-token and --intensity-channel-token "
+                          "must be given together.")
+        channel_sub = (args.mask_channel_token, args.intensity_channel_token)
 
     n_ok, n_failed = 0, 0
     iterator = tqdm(txt_paths, desc="Intensity profiling") if len(txt_paths) > 1 else txt_paths
@@ -437,6 +560,14 @@ def main() -> None:
             else:
                 image_path = resolve_raw_image_path(txt_path, Path(args.image_dir))
 
+            intensity_image_path = None
+            if args.intensity_image_path:
+                intensity_image_path = Path(args.intensity_image_path)
+            elif args.intensity_image_dir:
+                intensity_image_path = resolve_raw_image_path(
+                    txt_path, Path(args.intensity_image_dir), channel_sub=channel_sub,
+                )
+
             output_dir = (
                 Path(args.output_dir) if args.output_dir
                 else txt_path.parent / "intensity_profile"
@@ -445,6 +576,9 @@ def main() -> None:
             result = compute_and_plot_intensity_profile(
                 txt_path, image_path, output_dir,
                 n_segments=args.n_segments, pad_px=args.pad_px,
+                intensity_image_path=intensity_image_path,
+                mask_channel_label=args.mask_channel_label,
+                intensity_channel_label=args.intensity_channel_label,
             )
             n_ok += 1
             if len(txt_paths) == 1:
